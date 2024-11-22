@@ -14,6 +14,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.graphstream.graph.*;
+import org.graphstream.graph.implementations.*;
+import org.graphstream.ui.view.Viewer;
+
+import javax.swing.*;
+import java.awt.*;
 
 
 /**
@@ -32,6 +38,7 @@ public class JSON {
         JSONParser parser = new JSONParser();
         Set<String> uniqueNamesAndNumbers = new HashSet<>();
         Set<String> uniqueMotes = new HashSet<>();
+        Graph graph = new SingleGraph("Family Tree");
 
         try {
             // Parsea el archivo JSON
@@ -50,9 +57,12 @@ public class JSON {
                     for (Object miembroData : miembro.keySet()) {
                         System.out.println("    "+(String)miembroData);
                         JSONArray detalles = validarArr(miembro.get(miembroData), "la data de un miembro no es un array");
+                        Integrante integrante = new Integrante();
+                        integrante.setNombreCompleto((String)miembroData);
+                        graph.addNode((String) miembroData);
                         
                         // Valida e imprime los detalles individuales
-                        procesarDetalles(detalles, (String) miembroData, uniqueNamesAndNumbers, uniqueMotes);
+                        integrante = procesarDetalles(integrante, detalles, (String) miembroData, uniqueNamesAndNumbers, uniqueMotes);
                     }
                 }
             }
@@ -88,7 +98,7 @@ public class JSON {
         return (JSONObject) objeto;
     }
 
-    private void procesarDetalles(JSONArray detalles, String nombreCompleto, Set<String>uniqueNamesAndNumbers, Set<String>uniqueMotes) {
+    private Integrante procesarDetalles(Integrante integrante, JSONArray detalles, String nombreCompleto, Set<String>uniqueNamesAndNumbers, Set<String>uniqueMotes) {
         String anterior = null;
         String numeral = null;
 
@@ -101,22 +111,33 @@ public class JSON {
             switch (key) {
                 case "Of his name":
                     numeral = validateNumeral(value);
+                    integrante.setNumeral(numeral);
                     break;
                 case "Born to":
-                    validateBornTo(value);
+                    String progenitor = validateBornTo(value);
+                    if (integrante.getPadre() != null) {
+                        integrante.setMadre(progenitor);
+                    } else integrante.setPadre(progenitor);
                     break;
                 case "Known throughout as":
-                    validateUniqueMote(value, uniqueMotes);
+                    String mote = validateUniqueMote(value, uniqueMotes);
+                    integrante.setMote(mote);
                     break;
                 case "Held title":
-                    validateNonEmptyString(value, "Título nobiliario");
+                    String titulo = validateNonEmptyString(value, "Título nobiliario");
+                    integrante.setTitulo(titulo);
                     break;
                 case "Wed to":
-                    validateNonEmptyString(value, "Esposa");
+                    String esposa = validateNonEmptyString(value, "Esposa");
+                    integrante.setEsposa(esposa);
                     break;
                 case "Of eyes":
+                    String ojos = validateNonEmptyString(value, key + " (color)");
+                    integrante.setColorOjos(ojos);
+                    break;
                 case "Of hair":
-                    validateNonEmptyString(value, key + " (color)");
+                    String pelo = validateNonEmptyString(value, key + " (color)");
+                    integrante.setColorPelo(pelo);
                     break;
                 case "Father to":
                     validateChildren(value);
@@ -135,6 +156,7 @@ public class JSON {
                 throw new IllegalArgumentException("El nombre completo y numeral deben ser únicos: " + uniqueIdentifier);
             }
         }
+        return integrante;
     }
 
     private static String validateNumeral(Object value) {
@@ -145,15 +167,16 @@ public class JSON {
         return String.valueOf(value);
     }
 
-    private static void validateBornTo(Object value) {
+    private static String validateBornTo(Object value) {
         if (!(value instanceof String) || ((String) value).isEmpty()) {
             throw new IllegalArgumentException("El campo 'Born to' debe ser una cadena no vacía.");
         }
         System.out.println("        "+String.valueOf(value));
+        return String.valueOf(value);
         // Aquí se puede agregar lógica para verificar si el padre/madre existe en el árbol.
     }
 
-    private static void validateUniqueMote(Object value, Set<String> uniqueMotes) {
+    private static String validateUniqueMote(Object value, Set<String> uniqueMotes) {
         if (!(value instanceof String) || ((String) value).isEmpty()) {
             throw new IllegalArgumentException("El mote debe ser una cadena no vacía.");
         }
@@ -161,16 +184,18 @@ public class JSON {
             throw new IllegalArgumentException("El mote debe ser único: " + value);
         }
         System.out.println("        "+String.valueOf(value));
+        return String.valueOf(value);
     }
 
-    private static void validateNonEmptyString(Object value, String fieldName) {
+    private static String validateNonEmptyString(Object value, String fieldName) {
         if (!(value instanceof String) || ((String) value).isEmpty()) {
             throw new IllegalArgumentException("El campo '" + fieldName + "' debe ser una cadena no vacía.");
         }
         System.out.println("        "+String.valueOf(value));
+        return String.valueOf(value);
     }
 
-    private static void validateChildren(Object value) {
+    private static String validateChildren(Object value) {
         if (!(value instanceof JSONArray)) {
             throw new IllegalArgumentException("El campo 'Father to' debe ser un array.");
         }
@@ -180,9 +205,10 @@ public class JSON {
             if (!(child instanceof String) || ((String) child).isEmpty()) {
                 throw new IllegalArgumentException("Cada hijo debe ser una cadena no vacía.");
             }
-            System.out.println("         - "+child); 
+            System.out.println("         - "+child);
             // Aquí se puede agregar lógica para validar si el hijo existe en el árbol genealógico.
         }
+        return String.valueOf(value);
     }
     
 }

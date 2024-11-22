@@ -12,7 +12,7 @@ package arbolGenealogico;
  */
 public class Integrante {
     private String nombreCompleto;
-    private String nombre;
+    private String numeral;
     private String padre;
     private String madre;
     private String mote;
@@ -39,17 +39,17 @@ public class Integrante {
     }
 
     /**
-     * @return the nombre
+     * @return the numeral
      */
-    public String getNombre() {
-        return nombre;
+    public String getNumeral() {
+        return numeral;
     }
 
     /**
-     * @param nombre the nombre to set
+     * @param numeral the numeral to set
      */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNumeral(String numeral) {
+        this.numeral = numeral;
     }
 
     /**
