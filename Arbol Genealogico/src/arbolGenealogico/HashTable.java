@@ -16,6 +16,11 @@ public class HashTable {
     public HashTable(int hashSize){
         this.array = new Lista[hashSize];
         this.hashSize = hashSize;
+        
+        // Inicizaliza las listas en cada posicion
+        for( int i = 0; i < hashSize; i++){
+            array[i] = new Lista();
+        }
     } 
 
     /**
@@ -46,27 +51,18 @@ public class HashTable {
         this.hashSize = hashSize;
     }
     
-    public int getAsciiValue(String nombre) {
-        int suma = 0;
-
-        for (int i = 0; i < nombre.length(); i++) {
-            char character = nombre.charAt(i);
-            int ascii = (int) character;
-            suma += ascii;
-        }
-        return suma;
-    }
-        
+    // Calcula el hash segun los caracteres del nombre
     public int hashCode(String nombre) {
-        int clave;
-        nombre = nombre.toLowerCase();
-        clave = getAsciiValue(nombre) % getHashSize();
-        return clave;
+        int hash = 0;
+        for (int i = 0; i < nombre.length(); i++){
+            hash = (31 * hash + nombre.charAt(i)) % hashSize;
+        }
+        return hash;
     }
     
     public void printHashTable() {
         for (int i = 0; i < hashSize; i++) {
-            if (array[i] != null) {
+            if (!array[i].esVacia()) {
                 System.out.println("key: " + i);
                 array[i].toString();
             }
@@ -74,18 +70,27 @@ public class HashTable {
         }
     }
     
+    // Inserta un integrante en la tabla hash
     public void insertInHashtable(Integrante value) {
-
-        String name = value.getNombreCompleto();
-        int key = hashCode(name);
-        Lista subLista = new Lista();
-        subLista.insertarUltimo(name);
-        Lista valorArreglo = getArray()[key];
-        if (valorArreglo != null) {
-            valorArreglo.insertarUltimo(name);
-        } else {
-            getArray()[key] = subLista;
+        int key = hashCode(value.getNombreCompleto());
+        Lista lista = array[key];
+        if(!lista.seEncuentra(value)){
+            lista.insertarUltimo(value);
         }
     }
     
+   // BUscar un integrante por nombre completo
+    public Integrante buscar(String nombre){
+        int key = hashCode(nombre);
+        Lista lista = array[key];
+        Nodo actual = lista.getInicio();
+        while(actual != null){
+           Integrante integrante = (Integrante) actual.getInfo();
+           if(integrante.getNombreCompleto().equalsIgnoreCase(nombre)){
+               return integrante;
+           }
+           actual = actual.getSiguiente();
+        }
+        return null; // No encontrado
+    }
 }
