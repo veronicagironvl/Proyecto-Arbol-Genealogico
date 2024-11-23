@@ -12,18 +12,41 @@ package arbolGenealogico;
  */
 public class Integrante {
     private String nombreCompleto;
-    private String nombre;
-    private String padre;
-    private String madre;
-    private String mote;
-    private String titulo;
-    private String esposa;
-    private String colorOjos;
-    private String colorPelo;
-    private Lista hijos;
-    private String notas;
-    private String destino;
+    private String numeral; // "Of this name"
+    private String padre; // "Born to: padre"
+    private String madre; // "Born to: madre"
+    private String mote; // " Known throghout as"
+    private String titulo; // "Held title"
+    private String esposa; // "Wed to" (si existe)
+    private String colorOjos; // "Of eyes"
+    private String colorPelo; // "Of hair"
+    private Lista hijos; // "Father to" (lista de nombres)
+    private String notas; // "Notes"
+    private String destino; // "Fate"
 
+    public Integrante(){
+        this.hijos = new Lista(); //Inicializa la lista de hijos como vacia
+    }
+    
+    // Constructor completo
+    public Integrante(String nombreCompleto, String numeral, String padre,
+            String madre, String mote, String titulo, String esposa, 
+            String colorOjos, String colorPelo, Lista hijos, String notas, String destino){
+        this.nombreCompleto = nombreCompleto;
+        this.numeral = numeral;
+        this.padre = padre;
+        this.madre = madre;
+        this.mote = mote;
+        this.titulo = titulo;
+        this.esposa = esposa;
+        this.colorOjos = colorOjos;
+        this.colorPelo = colorPelo;
+        this.hijos = hijos != null ? hijos : new Lista(); // Asegura que la lista no sea nula
+        this.notas = notas;
+        this.destino = destino;
+        
+    }
+    
     /**
      * @return the nombreCompleto
      */
@@ -38,18 +61,12 @@ public class Integrante {
         this.nombreCompleto = nombreCompleto;
     }
 
-    /**
-     * @return the nombre
-     */
-    public String getNombre() {
-        return nombre;
+    public String getNumeral() {
+        return numeral;
     }
 
-    /**
-     * @param nombre the nombre to set
-     */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNumeral(String numeral) {
+        this.numeral = numeral;
     }
 
     /**
@@ -161,7 +178,7 @@ public class Integrante {
      * @param hijos the hijos to set
      */
     public void setHijos(Lista hijos) {
-        this.hijos = hijos;
+        this.hijos = hijos != null ? hijos : new Lista(); // Asegura que la lista no este vacia
     }
 
     /**
@@ -191,6 +208,9 @@ public class Integrante {
     public void setDestino(String destino) {
         this.destino = destino;
     }
+
+
+    
 }
 
 

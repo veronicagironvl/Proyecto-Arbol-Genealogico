@@ -4,12 +4,17 @@
  */
 package interfaz;
 
-import java.io.File;
+import arbolGenealogico.Arbol;
+
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import arbolGenealogico.JSON;
-
+import org.graphstream.graph.*;
+import org.graphstream.ui.swing_viewer.SwingViewer;
+import org.graphstream.ui.swing_viewer.ViewPanel;
+import java.awt.*;
+import java.io.File;
 
 /**
  *
@@ -17,11 +22,12 @@ import arbolGenealogico.JSON;
  */
 public class VentanaArbolGenealogico extends javax.swing.JFrame {
 
-    /**
-     * Creates new form ventanaArbolGenealogico
-     */
+    private Graph graph; // Grafo generado
+    private Arbol arbol; // Referencia al arbol cargado
+    
     public VentanaArbolGenealogico() {
         initComponents();
+        panelGrafo.setLayout(new BorderLayout());
     }
 
     /**
@@ -36,9 +42,10 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
+        panelGrafo = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         cargarArbol = new javax.swing.JButton();
+        actualizarGrafo = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -58,9 +65,9 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1030, 80));
 
         jLabel1.setText("aqui ira el grafo");
-        jPanel3.add(jLabel1);
+        panelGrafo.add(jLabel1);
 
-        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 610, 570));
+        jPanel1.add(panelGrafo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 610, 570));
 
         cargarArbol.setText("Añadir Árbol JSON");
         cargarArbol.addActionListener(new java.awt.event.ActionListener() {
@@ -70,6 +77,14 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
         });
         jPanel1.add(cargarArbol, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 120, -1, -1));
 
+        actualizarGrafo.setText("Actualizar Grafo");
+        actualizarGrafo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                actualizarGrafoActionPerformed(evt);
+            }
+        });
+        jPanel1.add(actualizarGrafo, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 190, -1, -1));
+
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1030, 650));
 
         pack();
@@ -77,7 +92,7 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
 
     private void cargarArbolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cargarArbolActionPerformed
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Selecciona un archivo JSON de red de transporte");
+        fileChooser.setDialogTitle("Selecciona un archivo JSON de árbol genealógico");
 
         // Filtrar para que solo permita archivos JSON
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos JSON", "json");
@@ -85,32 +100,63 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
 
         int resultado = fileChooser.showOpenDialog(this);
 
-        // Si el usuario selecciona un archivo
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoSeleccionado = fileChooser.getSelectedFile();
             String rutaArchivo = archivoSeleccionado.getAbsolutePath();
 
-            JSON json = new JSON(rutaArchivo);  // Crear instancia de JSON
+            JSON json = new JSON(rutaArchivo);
             try {
-                // Llamar al método para cargar el JSON en el grafo
-                json.cargarDesdeJSON();
+                arbol = json.cargarDesdeJSON(); // Cargar el árbol desde JSON
+                graph = arbol.generarGrafo(); // Generar el grafo a partir del árbol
 
-                JOptionPane.showMessageDialog(this, "Red cargada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                // Validar si el grafo tiene contenido
+                if (graph.getNodeCount() == 0) {
+                    JOptionPane.showMessageDialog(this, "El grafo está vacío. No hay datos para mostrar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                mostrarGrafoEnPanel(); // Mostrar el grafo en el panel
+                JOptionPane.showMessageDialog(this, "Cargado exitosamente: Árbol de la Casa " + arbol.getLinaje(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error al cargar el archivo JSON: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
             }
-        }   
+        }
     }//GEN-LAST:event_cargarArbolActionPerformed
 
+    private void actualizarGrafoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualizarGrafoActionPerformed
+        if (graph != null) {
+            mostrarGrafoEnPanel();
+        } else {
+            JOptionPane.showMessageDialog(this, "No hay grafo cargado.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_actualizarGrafoActionPerformed
+
+    private void mostrarGrafoEnPanel(){
+        panelGrafo.removeAll(); // Limpia el contenido actual del panel
+
+        if (graph != null) {
+            // Configurar el visor de GraphStream
+            SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+            viewer.enableAutoLayout();
+            ViewPanel viewerPanel = (ViewPanel) viewer.addDefaultView(false); // Generar el panel de visualización
+
+            panelGrafo.add(viewerPanel, BorderLayout.CENTER); // Agregar al centro del panel
+            panelGrafo.revalidate(); // Validar el nuevo contenido
+            panelGrafo.repaint(); // Redibujar el panel
+        } else {
+            JOptionPane.showMessageDialog(this, "No hay grafo cargado para mostrar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }
  
   
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton actualizarGrafo;
     private javax.swing.JButton cargarArbol;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel panelGrafo;
     // End of variables declaration//GEN-END:variables
 }
