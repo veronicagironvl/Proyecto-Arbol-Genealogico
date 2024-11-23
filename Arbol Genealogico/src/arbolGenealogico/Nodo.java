@@ -16,16 +16,16 @@ package arbolGenealogico;
  * @author aiannelli
  */
 public class Nodo {
-    private String info;
+    private Object info;
     private Nodo siguiente;
     
     /**
      * Constructor que crea un nodo con un dato espec&iacute;fico y el siguiente nodo inicializado a null.
      *
-     * @param data El dato a almacenar en el nodo.
+     * @param info El dato a almacenar en el nodo.
      */
-    public Nodo (String data) {
-        this.info = data;
+    public Nodo (Object info) {
+        this.info = info;
         this.siguiente = null;
     }    
     
@@ -44,7 +44,7 @@ public class Nodo {
      * Obtiene el dato almacenado en el nodo.
      * @return El dato del nodo.
      */
-    public String getInfo() {
+    public Object getInfo() {
         return info;
     }
 
@@ -52,7 +52,7 @@ public class Nodo {
      * Establece un nuevo valor para el dato del nodo.
      * @param info El nuevo valor del dato.
      */
-    public void setInfo(String info) {
+    public void setInfo(Object info) {
         this.info = info;
     }
 
