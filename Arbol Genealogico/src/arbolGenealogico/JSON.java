@@ -61,7 +61,13 @@ public class JSON {
                         Integrante integrante = crearIntegrante(nombreCompleto, detalles, uniqueNamesAndNumbers, uniqueMotes);
                         
                         String rawPadre = integrante.getPadre();
-                        String padreResuelto = resolverPadre(rawPadre, arbol);
+                        String padreResuelto = resolverPadre(rawPadre, arbol, integrante.getNumeral());
+                        
+                        // Verifica si el padre resuelto es el propio nodo
+                        if (padreResuelto != null && padreResuelto.equals(nombreCompleto)) {
+                            System.err.println("Error: El nodo " + nombreCompleto + " no puede ser su propio padre.");
+                            continue; // Saltar este nodo para evitar ciclos
+                        }
 
                         // Verifica si el nodo es la raiz
                         if ("[Unknown]".equalsIgnoreCase(rawPadre)) {
@@ -111,8 +117,10 @@ public class JSON {
 
             while (actual != null) {
                 Integrante pendiente = (Integrante) actual.getInfo();
-                String padreResuelto = resolverPadre(pendiente.getPadre(), arbol);
-                if (nodosDefinidos.contains(padreResuelto)) {
+                String padreResuelto = resolverPadre(pendiente.getPadre(), arbol, pendiente.getNumeral());
+                
+                // Verifica si el padre ya esta definido
+                if (padreResuelto != null && nodosDefinidos.contains(padreResuelto)) {
                     // Intentar insertar si el padre ya está definido
                     try {
                         arbol.insertar(pendiente, padreResuelto);
@@ -142,25 +150,32 @@ public class JSON {
         }
     }
 
-    private String resolverPadre(String rawPadre, Arbol arbol){
-        if(rawPadre == null || rawPadre.equalsIgnoreCase("[Unknown")){
+    private String resolverPadre(String rawPadre, Arbol arbol, String numeral){
+        if(rawPadre == null || rawPadre.equalsIgnoreCase("[Unknown]")){
             return null;
         }
         
-        NodoArbol nodoPadre = buscarNodoPorNombre(arbol.getRaiz(), rawPadre);
+        // Buscar padre por combinacion 
+        NodoArbol nodoPadre = buscarNodoPorCombinacion(arbol.getRaiz(), rawPadre, numeral);
         if(nodoPadre != null){
             return nodoPadre.getIntegrante().getNombreCompleto();
         }
         
+        // Buscar padre por nombre 
+        nodoPadre = buscarNodoPorNombre(arbol.getRaiz(), rawPadre);
+        if(nodoPadre != null){
+            return nodoPadre.getIntegrante().getNombreCompleto();
+        }
+      
+        // Buscar padre por mote
         nodoPadre = buscarNodoPorMote(arbol.getRaiz(), rawPadre);
         if(nodoPadre != null){
             return nodoPadre.getIntegrante().getNombreCompleto();
         }
         
-        nodoPadre = buscarNodoPorCombinacion(arbol.getRaiz(), rawPadre);
-        if(nodoPadre != null){
-            return nodoPadre.getIntegrante().getNombreCompleto();
-        }
+        
+        
+        // Si no se encuentra el padre, devolver el rawPadre como está
         return rawPadre;
     }
 
@@ -192,7 +207,7 @@ public class JSON {
         return null;
     }
     
-    private NodoArbol buscarNodoPorCombinacion(NodoArbol nodo, String nombrePadre){
+    private NodoArbol buscarNodoPorCombinacion(NodoArbol nodo, String nombrePadre, String numeral){
         if(nodo == null) return null;
         String nombreCombinado = nodo.getIntegrante().getNombreCompleto() + ", " + nodo.getIntegrante().getNumeral() + " of his name";
         
@@ -202,9 +217,8 @@ public class JSON {
         
         Nodo actual = nodo.getHijos().getInicio();
         while(actual != null){
-            NodoArbol encontrado = buscarNodoPorCombinacion((NodoArbol) actual.getInfo(), nombrePadre);
+            NodoArbol encontrado = buscarNodoPorCombinacion((NodoArbol) actual.getInfo(), nombrePadre, numeral);
             if(encontrado != null) {
-                System.out.println(encontrado.getIntegrante().getNombreCompleto() +" hijo de " + nombreCombinado);
                 return encontrado;
             }
             actual = actual.getSiguiente();
