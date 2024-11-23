@@ -48,7 +48,10 @@ public class JSON {
 
                 for (Object miembroObj : miembros) {
                     JSONObject miembro = validarObj(miembroObj, "Los miembros no son objetos JSON");
-
+                    System.out.println("------------");
+                    System.out.println(miembro);
+                    System.out.println("------------");
+                    
                     for (Object miembroData : miembro.keySet()) {
                         System.out.println("    " + (String) miembroData);
                         JSONArray detalles = validarArr(miembro.get(miembroData), "La data de un miembro no es un array");
@@ -156,6 +159,9 @@ public class JSON {
                     break;
                 case "Born to":
                     integrante.setPadre(validateBornTo(value));
+                    if (integrante.getPadre() != null){                        
+                        integrante.setMadre(validateBornTo(value));
+                    }
                     break;
                 case "Known throughout as":
                     integrante.setMote(validateUniqueMote(value, uniqueMotes));

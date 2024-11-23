@@ -52,6 +52,12 @@ public class Arbol {
         return raiz;
     }
     
+     /**
+     * @param raiz the raiz to set
+     */
+    public void setRaiz(NodoArbol raiz) {
+        this.raiz = raiz;
+    }
     
     public Graph generarGrafo(){
         Graph graph = new SingleGraph(linaje);
