@@ -70,23 +70,24 @@ public class Arbol {
         
         String nombreNodo = nodo.getIntegrante().getNombreCompleto();
        
-        // Agrregar nodo al grafo si no existe
+        // Agregar nodo al grafo si no existe
         if(graph.getNode(nombreNodo) == null){
             Node graphNode = graph.addNode(nombreNodo);
             graphNode.setAttribute("ui.label", nombreNodo);
         }
         
-        // Recorre los hijos del nodo y agrega sus conexiones
+        // Agregar hijos y sus conexiones
         Nodo actual = nodo.getHijos().getInicio();
         while(actual != null){
             NodoArbol hijo = (NodoArbol) actual.getInfo();
-            agregarNodoGrafico(graph, hijo);
+            agregarNodoGrafico(graph, hijo); // Agrega al nodo hijo
             
             String nombreHijo = hijo.getIntegrante().getNombreCompleto();
             
-            // Agrega la arista entre el nodo y su hijo si no existe
-            if(graph.getEdge(nombreNodo + "->" + nombreHijo) == null){
-                graph.addEdge(nombreNodo + "->" + nombreHijo, nombreNodo, nombreHijo);
+            // Agregar la arista entre el nodo actual y su hijo
+            String edgeId = nombreNodo + "->" + nombreHijo;
+            if (graph.getEdge(edgeId) == null) {
+                graph.addEdge(edgeId, nombreNodo, nombreHijo, true); // Arista dirigida
             }
             actual = actual.getSiguiente();
         }

@@ -35,6 +35,7 @@ public class JSON {
         Set<String> uniqueMotes = new HashSet<>();
         Set<String> nodosDefinidos = new HashSet<>(); // Nombre de nodos ya procesados
         Lista pendientes = new Lista(); // Nodos con padres no encontrados
+        boolean raizDefinida = false; // identificador de si existe una raiz definida
 
         try {
             JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(archivo));
@@ -58,10 +59,23 @@ public class JSON {
 
                         String nombreCompleto = (String) miembroData;
                         Integrante integrante = crearIntegrante(nombreCompleto, detalles, uniqueNamesAndNumbers, uniqueMotes);
+                        
+                        String rawPadre = integrante.getPadre();
+                        String padreResuelto = resolverPadre(rawPadre, arbol);
 
-                        if (integrante.getPadre() == null || nodosDefinidos.contains(integrante.getPadre())) {
-                            // Si el padre es nulo o ya fue definido, insertar directamente
-                            arbol.insertar(integrante, integrante.getPadre());
+                        // Verifica si el nodo es la raiz
+                        if ("[Unknown]".equalsIgnoreCase(rawPadre)) {
+                            if (!raizDefinida) {
+                                // Si no hay raiz, este nodo sera la raiz
+                                arbol.insertar(integrante, null);
+                                nodosDefinidos.add(integrante.getNombreCompleto());
+                                raizDefinida = true;
+                            }else{
+                                throw new IllegalArgumentException("Ya existe una raiz definida: " + arbol.getRaiz().getIntegrante().getNombreCompleto());
+                            }
+                        } else if (nodosDefinidos.contains(padreResuelto)){
+                            // Insertar si el padre ya esta definido
+                            arbol.insertar(integrante, padreResuelto);
                             nodosDefinidos.add(integrante.getNombreCompleto());
                         } else {
                             // Si el padre no está definido, guardar como pendiente
@@ -74,6 +88,9 @@ public class JSON {
 
             // Reintentar insertar los nodos pendientes
             procesarPendientes(pendientes, arbol, nodosDefinidos);
+            if (!raizDefinida){
+                throw new IllegalArgumentException("El archivo JSON no tiene un nodo raiz.");
+            }
 
         } catch (IOException e) {
             System.err.println("Error al leer el archivo JSON: " + e.getMessage());
@@ -94,16 +111,20 @@ public class JSON {
 
             while (actual != null) {
                 Integrante pendiente = (Integrante) actual.getInfo();
-                if (nodosDefinidos.contains(pendiente.getPadre())) {
+                String padreResuelto = resolverPadre(pendiente.getPadre(), arbol);
+                if (nodosDefinidos.contains(padreResuelto)) {
                     // Intentar insertar si el padre ya está definido
                     try {
-                        arbol.insertar(pendiente, pendiente.getPadre());
+                        arbol.insertar(pendiente, padreResuelto);
                         nodosDefinidos.add(pendiente.getNombreCompleto());
                         pendientes.eliminar(pendiente); // Eliminar si fue insertado correctamente
                         huboCambios = true;
                     } catch (IllegalArgumentException e) {
                         System.err.println("Error al insertar nodo pendiente: " + pendiente.getNombreCompleto());
                     }
+                } else if (!nodosDefinidos.contains(padreResuelto)){
+                        System.err.println("El padre de " + pendiente.getNombreCompleto() + " (" + pendiente.getPadre() + ") no existe. Nodo eliminado.");
+                        pendientes.eliminar(pendiente);
                 }
                 actual = actual.getSiguiente();
             }
@@ -121,7 +142,77 @@ public class JSON {
         }
     }
 
+    private String resolverPadre(String rawPadre, Arbol arbol){
+        if(rawPadre == null || rawPadre.equalsIgnoreCase("[Unknown")){
+            return null;
+        }
+        
+        NodoArbol nodoPadre = buscarNodoPorNombre(arbol.getRaiz(), rawPadre);
+        if(nodoPadre != null){
+            return nodoPadre.getIntegrante().getNombreCompleto();
+        }
+        
+        nodoPadre = buscarNodoPorMote(arbol.getRaiz(), rawPadre);
+        if(nodoPadre != null){
+            return nodoPadre.getIntegrante().getNombreCompleto();
+        }
+        
+        nodoPadre = buscarNodoPorCombinacion(arbol.getRaiz(), rawPadre);
+        if(nodoPadre != null){
+            return nodoPadre.getIntegrante().getNombreCompleto();
+        }
+        return rawPadre;
+    }
 
+    private NodoArbol buscarNodoPorNombre(NodoArbol nodo, String nombre){
+        if(nodo == null) return null;
+        
+        if (nodo.getIntegrante().getNombreCompleto().equalsIgnoreCase(nombre)) return nodo;
+        
+        Nodo actual = nodo.getHijos().getInicio();
+        
+        while(actual != null){
+            NodoArbol encontrado = buscarNodoPorNombre((NodoArbol) actual.getInfo(), nombre);
+            if(encontrado != null) return encontrado;
+            actual = actual.getSiguiente();
+        }
+        return null;
+    }
+    
+    private NodoArbol buscarNodoPorMote(NodoArbol nodo, String mote){
+        if(nodo == null) return null;
+        if(nodo.getIntegrante().getMote() != null && nodo.getIntegrante().getMote().equalsIgnoreCase(mote)) return nodo;
+         
+        Nodo actual = nodo.getHijos().getInicio();
+        while(actual !=null){
+            NodoArbol encontrado = buscarNodoPorMote((NodoArbol) actual.getInfo(), mote);
+            if(encontrado != null) return encontrado;
+            actual = actual.getSiguiente();
+        }
+        return null;
+    }
+    
+    private NodoArbol buscarNodoPorCombinacion(NodoArbol nodo, String nombrePadre){
+        if(nodo == null) return null;
+        String nombreCombinado = nodo.getIntegrante().getNombreCompleto() + ", " + nodo.getIntegrante().getNumeral() + " of his name";
+        
+
+       
+        if(nombreCombinado.equalsIgnoreCase(nombrePadre)) return nodo;
+        
+        Nodo actual = nodo.getHijos().getInicio();
+        while(actual != null){
+            NodoArbol encontrado = buscarNodoPorCombinacion((NodoArbol) actual.getInfo(), nombrePadre);
+            if(encontrado != null) {
+                System.out.println(encontrado.getIntegrante().getNombreCompleto() +" hijo de " + nombreCombinado);
+                return encontrado;
+            }
+            actual = actual.getSiguiente();
+            
+
+        }
+        return null;
+    }
     /**
      * @throws IllegalArgumentException Valida que el objeto procesado es un
      * JSONArray.
@@ -155,37 +246,38 @@ public class JSON {
 
             switch (key) {
                 case "Of his name":
-                    integrante.setNumeral(validateNumeral(value));
+                    integrante.setNumeral(validateNonEmptyString(value, "Of his name"));
                     break;
                 case "Born to":
-                    integrante.setPadre(validateBornTo(value));
-                    if (integrante.getPadre() != null){                        
-                        integrante.setMadre(validateBornTo(value));
+                    if(integrante.getPadre() == null){
+                        integrante.setPadre(validateNonEmptyString(value, "Born to"));
+                    } else {
+                        integrante.setMadre(validateNonEmptyString(value, "Born to"));
                     }
                     break;
                 case "Known throughout as":
-                    integrante.setMote(validateUniqueMote(value, uniqueMotes));
+                    integrante.setMote(validateNonEmptyString(value, "Known throughout as"));
                     break;
                 case "Held title":
-                    integrante.setTitulo(validateNonEmptyString(value, "Título nobiliario"));
+                    integrante.setTitulo(validateNonEmptyString(value, "Held title"));
                     break;
                 case "Wed to":
-                    integrante.setEsposa(validateNonEmptyString(value, "Esposa"));
+                    integrante.setEsposa(validateNonEmptyString(value, "Wed to"));
                     break;
                 case "Of eyes":
-                    integrante.setColorOjos(validateNonEmptyString(value, "Color de ojos"));
+                    integrante.setColorOjos(validateNonEmptyString(value, "Of eyes"));
                     break;
                 case "Of hair":
-                    integrante.setColorOjos(validateNonEmptyString(value, "Color de pelo"));
+                    integrante.setColorOjos(validateNonEmptyString(value, "Of hair"));
                     break;
                 case "Father to":
                     integrante.setHijos(validateChildren(value));
                     break;
                 case "Notes":
-                    integrante.setNotas(validateNonEmptyString(value, "Notas"));
+                    integrante.setNotas(validateNonEmptyString(value, "Notes"));
                     break;
                 case "Fate":
-                    integrante.setDestino(validateNonEmptyString(value, "Destino"));
+                    integrante.setDestino(validateNonEmptyString(value, "Fate"));
                     break;
                 default:
                     throw new IllegalArgumentException("Campo desconocido: " + key);
