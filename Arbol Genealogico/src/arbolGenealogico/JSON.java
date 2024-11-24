@@ -157,9 +157,10 @@ public class JSON {
                 case "Of his name":
                     integrante.setNumeral(validateNumeral(value));
                     break;
-                case "Born to":
-                    integrante.setPadre(validateBornTo(value));
+                case "Born to":            
                     if (integrante.getPadre() != null){                        
+                        integrante.setPadre(validateBornTo(value));
+                    }else{
                         integrante.setMadre(validateBornTo(value));
                     }
                     break;
