@@ -13,6 +13,7 @@ import org.graphstream.graph.implementations.*;
 
 public class Arbol {
 
+    private Graph graph;
     private NodoArbol raiz;
     private String linaje;
 
@@ -21,16 +22,19 @@ public class Arbol {
     }
 
     public Arbol(HashTable hashTable) {
-        
-        // Agrega el hash respectivo a cada integrante y encuentra la raiz
+
+        // Agrega el hash respectivo a cada integrante y agrega la raiz al arbol
         for (int i = 0; i < hashTable.getHashSize(); i++) {
             Integrante integrante = hashTable.obtenerIntegrante(i);
             integrante.setHash(i);
             hashTable.devolverIntegrante(i, integrante);
             if ((integrante.getPadre()).equals("[Unknown]")) {
-                Integrante raiz = integrante;
+                NodoArbol nodoRaiz = new NodoArbol(integrante);
+                this.raiz = nodoRaiz;
             }
         }
+        
+        this.graph = this.generarGrafo();
     }
 
     public void insertar(Integrante integrante, String nombrePadre) {
@@ -92,21 +96,22 @@ public class Arbol {
     }
 
     public Graph generarGrafo() {
-        Graph graph = new SingleGraph(linaje);
-        agregarNodoGrafico(graph, raiz);
+        graph = new SingleGraph(linaje);
+        graph = agregarNodoGrafico(graph, raiz);
         return graph;
     }
 
-    private void agregarNodoGrafico(Graph graph, NodoArbol nodo) {
+    private Graph agregarNodoGrafico(Graph graph, NodoArbol nodo) {
         if (nodo == null) {
-            return;
+            return graph;
         }
 
-        String nombreNodo = nodo.getIntegrante().getNombreCompleto();
+        String idNodo = Integer.toString(nodo.getIntegrante().getHash());
+        String nombreNodo = nodo.getIntegrante().getIdentificadorUnico();
 
         // Agregar nodo al grafo si no existe
-        if (graph.getNode(nombreNodo) == null) {
-            Node graphNode = graph.addNode(nombreNodo);
+        if (graph.getNode(idNodo) == null) {
+            Node graphNode = graph.addNode(idNodo);
             graphNode.setAttribute("ui.label", nombreNodo);
         }
 
@@ -115,34 +120,49 @@ public class Arbol {
         while (actual != null) {
             NodoArbol hijo = (NodoArbol) actual.getInfo();
             agregarNodoGrafico(graph, hijo); // Agrega al nodo hijo
-
+            
+            String idHijo = Integer.toString(hijo.getIntegrante().getHash());
             String nombreHijo = hijo.getIntegrante().getNombreCompleto();
 
             // Agregar la arista entre el nodo actual y su hijo
-            String edgeId = nombreNodo + "->" + nombreHijo;
+            String edgeId = idNodo + "->" + idHijo;
             if (graph.getEdge(edgeId) == null) {
-                graph.addEdge(edgeId, nombreNodo, nombreHijo, true); // Arista dirigida
+                graph.addEdge(edgeId, idNodo, idHijo, true); // Arista dirigida
             }
             actual = actual.getSiguiente();
         }
-
+        return graph;
     }
 
-    private Integrante buscarPadre(String nombrePadre, HashTable hashTable){
-        
+    private NodoArbol agregarHijos(NodoArbol padre, HashTable hashTable) {
         for (int i = 0; i < hashTable.getHashSize(); i++) {
             Integrante aux = hashTable.obtenerIntegrante(i);
-            if (aux.getIdentificadorUnico().equalsIgnoreCase(nombrePadre)){
-                return aux;
-            } else if (aux.getMote().equalsIgnoreCase(nombrePadre)){
-                return aux;
-            } else if (aux.getNombreCompleto().equalsIgnoreCase(nombrePadre)){
-                return aux;
-            }   
+            String nombrePadre = aux.getPadre();
+            if (esHijoDe(nombrePadre, hashTable)) {
+                NodoArbol hijo = new NodoArbol(aux);
+                padre.agregarHijo(hijo);
+            }
         }
-        return null;
-    }   
-        
+        return padre;
+    }
+
+    private boolean esHijoDe(String nombrePadre, HashTable hashTable) {
+
+        for (int i = 0; i < hashTable.getHashSize(); i++) {
+            Integrante aux = hashTable.obtenerIntegrante(i);
+            if (aux.getIdentificadorUnico().equalsIgnoreCase(nombrePadre)) {
+                return true;
+            } else if (aux.getMote() != null) {
+                if (aux.getMote().equalsIgnoreCase(nombrePadre)) {
+                    return true;
+                }
+            } else if (aux.getNombreCompleto().equalsIgnoreCase(nombrePadre)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 //        //String nombreCombinado = nodo.getIntegrante().getNombreCompleto() + ", " + nodo.getIntegrante().getNumeral() + " of his name";
 //        String nombreCombinado = integrante.getIdentificadorUnico();
 //       
@@ -173,7 +193,6 @@ public class Arbol {
 //        }
 //        return null;
 //    }
-
 //    private Integrante buscarIntegrante(Integrante integrante, String nombre) {
 //        if (integrante == null) {
 //            return null;
@@ -194,5 +213,18 @@ public class Arbol {
 //        }
 //        return null;
 //    }
+    /**
+     * @return the graph
+     */
+    public Graph getGraph() {
+        return graph;
+    }
+
+    /**
+     * @param graph the graph to set
+     */
+    public void setGraph(Graph graph) {
+        this.graph = graph;
+    }
 
 }

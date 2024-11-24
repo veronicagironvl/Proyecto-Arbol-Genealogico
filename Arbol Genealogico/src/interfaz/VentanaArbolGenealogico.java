@@ -110,7 +110,8 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
             try {
                 hashTable = json.cargarDesdeJSON(); // Cargar el árbol desde JSON
                 arbol = new Arbol(hashTable);
-                graph = arbol.generarGrafo(); // Generar el grafo a partir del árbol
+                this.graph = arbol.getGraph();
+
 
                 // Validar si el grafo tiene contenido
                 if (graph.getNodeCount() == 0) {
