@@ -61,22 +61,16 @@ public class Integrante {
         this.nombreCompleto = nombreCompleto;
     }
 
-<<<<<<< HEAD
     /**
      * @return the numeral
      */
-=======
->>>>>>> 25ae0dac0ae6f07d8be65a7d500bc3a3b7f07f58
     public String getNumeral() {
         return numeral;
     }
 
-<<<<<<< HEAD
     /**
      * @param numeral the numeral to set
      */
-=======
->>>>>>> 25ae0dac0ae6f07d8be65a7d500bc3a3b7f07f58
     public void setNumeral(String numeral) {
         this.numeral = numeral;
     }
