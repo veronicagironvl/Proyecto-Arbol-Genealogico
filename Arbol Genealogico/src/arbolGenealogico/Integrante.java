@@ -11,40 +11,36 @@ package arbolGenealogico;
  * @author Adrian
  */
 public class Integrante {
-    private String nombreCompleto;
+    private String nombreCompleto; // Nombre + Apellido
+    private String nombre; // solo el primer nombre del nombre completo
     private String numeral; // "Of this name"
     private String padre; // "Born to: padre"
-    private String madre; // "Born to: madre"
-    private String mote; // " Known throghout as"
-    private String titulo; // "Held title"
-    private String esposa; // "Wed to" (si existe)
+    private String madre; // "Born to: madre" (opcional)
+    private String mote; // " Known throghout as" (opcional)
+    private String titulo; // "Held title" (opcional)
+    private String esposa; // "Wed to" (opcional)
     private String colorOjos; // "Of eyes"
     private String colorPelo; // "Of hair"
-    private Lista hijos; // "Father to" (lista de nombres)
-    private String notas; // "Notes"
-    private String destino; // "Fate"
+    private Lista hijos; // "Father to" (lista de nombres) (opcional)
+    private String notas; // "Notes" (opcional)
+    private String destino; // "Fate" (opcional)
+    private int hash; // Identificador unico
 
     public Integrante(){
+        this.nombreCompleto = null;
+        this.nombre = null;
+        this.numeral = null;
+        this.padre = null;
+        this.madre = null;
+        this.mote = null;
+        this.titulo = null;
+        this. esposa = null;
+        this.colorOjos = null;
+        this.colorPelo = null;
         this.hijos = new Lista(); //Inicializa la lista de hijos como vacia
-    }
-    
-    // Constructor completo
-    public Integrante(String nombreCompleto, String numeral, String padre,
-            String madre, String mote, String titulo, String esposa, 
-            String colorOjos, String colorPelo, Lista hijos, String notas, String destino){
-        this.nombreCompleto = nombreCompleto;
-        this.numeral = numeral;
-        this.padre = padre;
-        this.madre = madre;
-        this.mote = mote;
-        this.titulo = titulo;
-        this.esposa = esposa;
-        this.colorOjos = colorOjos;
-        this.colorPelo = colorPelo;
-        this.hijos = hijos != null ? hijos : new Lista(); // Asegura que la lista no sea nula
-        this.notas = notas;
-        this.destino = destino;
-        
+        this.notas = null;
+        this.destino = null;
+        this.hash = 0;
     }
     
     /**
@@ -59,6 +55,7 @@ public class Integrante {
      */
     public void setNombreCompleto(String nombreCompleto) {
         this.nombreCompleto = nombreCompleto;
+        this.setNombre(extraerNombre(nombreCompleto));
     }
 
     /**
@@ -215,8 +212,42 @@ public class Integrante {
         this.destino = destino;
     }
 
+    /**
+     * @return the hash
+     */
+    public int getHash() {
+        return hash;
+    }
 
+    /**
+     * @param hash the hash to set
+     */
+    public void setHash(int hash) {
+        this.hash = hash;
+    }
+
+    /**
+     * @return the nombre
+     */
+    public String getNombre() {
+        return nombre;
+    }
+
+    /**
+     * @param nombre the nombre to set
+     */
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
     
+    public String getIdentificadorUnico(){
+        return nombreCompleto+", "+numeral+" of his name";
+    }
+    
+    public String extraerNombre(String nombreCompleto) {
+        String[] partes = nombreCompleto.split(" ");
+        return partes[0];
+    }
 }
 
 

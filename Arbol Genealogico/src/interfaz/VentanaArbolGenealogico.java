@@ -10,6 +10,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import arbolGenealogico.JSON;
+import arbolGenealogico.HashTable;
 import org.graphstream.graph.*;
 import org.graphstream.ui.swing_viewer.SwingViewer;
 import org.graphstream.ui.swing_viewer.ViewPanel;
@@ -23,6 +24,7 @@ import java.io.File;
 public class VentanaArbolGenealogico extends javax.swing.JFrame {
 
     private Graph graph; // Grafo generado
+    private HashTable hashTable; // lista enlazada de integrantes
     private Arbol arbol; // Referencia al arbol cargado
     
     public VentanaArbolGenealogico() {
@@ -106,7 +108,8 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
 
             JSON json = new JSON(rutaArchivo);
             try {
-                arbol = json.cargarDesdeJSON(); // Cargar el árbol desde JSON
+                hashTable = json.cargarDesdeJSON(); // Cargar el árbol desde JSON
+                arbol = new Arbol(hashTable);
                 graph = arbol.generarGrafo(); // Generar el grafo a partir del árbol
 
                 // Validar si el grafo tiene contenido
