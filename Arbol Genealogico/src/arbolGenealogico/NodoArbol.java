@@ -25,7 +25,22 @@ public class NodoArbol {
         return hijos;
     }
     
+
+    /**
+     * @param integrante the integrante to set
+     */
+    public void setIntegrante(Integrante integrante) {
+        this.integrante = integrante;
+    }
+
+    /**
+     * @param hijos the hijos to set
+     */
+    public void setHijos(Lista hijos) {
+        this.hijos = hijos;
+    }
+    
     public void agregarHijo(NodoArbol hijo){
-        hijos.insertarUltimo(hijo);
+        getHijos().insertarUltimo(hijo);
     }
 }

@@ -9,19 +9,19 @@ package arbolGenealogico;
  * @author aiannelli
  */
 public class HashTable {
+
     private Lista[] array;
     private int hashSize;
 
-
-    public HashTable(int hashSize){
+    public HashTable(int hashSize) {
         this.array = new Lista[hashSize];
         this.hashSize = hashSize;
-        
+
         // Inicizaliza las listas en cada posicion
-        for( int i = 0; i < hashSize; i++){
+        for (int i = 0; i < hashSize; i++) {
             array[i] = new Lista();
         }
-    } 
+    }
 
     /**
      * @return the array
@@ -50,47 +50,81 @@ public class HashTable {
     public void setHashSize(int hashSize) {
         this.hashSize = hashSize;
     }
-    
+
     // Calcula el hash segun los caracteres del nombre
-    public int hashCode(String nombre) {
-        int hash = 0;
-        for (int i = 0; i < nombre.length(); i++){
-            hash = (31 * hash + nombre.charAt(i)) % hashSize;
-        }
-        return hash;
+    public int hashCode1(String name, String numeral) {
+        int clave;
+        name = name.toLowerCase();
+        numeral = numeral.toLowerCase();
+        String junto = name + numeral;
+        clave = getAsciiValue1(junto) % hashSize;
+        return clave;
     }
-    
+
+    // Retorna la suma de valores ascii de una palabra
+    public int getAsciiValue1(String palabra) {
+        int suma = 0;
+
+        for (int i = 0; i < palabra.length(); i++) {
+            char character = palabra.charAt(i);
+            int ascii = (int) character;
+            suma += ascii;
+        }
+        return suma;
+    }
+
     public void printHashTable() {
         for (int i = 0; i < hashSize; i++) {
             if (!array[i].esVacia()) {
-                System.out.println("key: " + i);
-                array[i].toString();
+                Lista lista = array[i];
+                Object contenido = lista.buscarPorIndice(0);
+                Integrante miembro = (Integrante) contenido;
+                System.out.println(miembro.getNombreCompleto());
+            } else {
+                System.out.println("vacia");
             }
-
         }
     }
-    
+
     // Inserta un integrante en la tabla hash
     public void insertInHashtable(Integrante value) {
-        int key = hashCode(value.getNombreCompleto());
-        Lista lista = array[key];
-        if(!lista.seEncuentra(value)){
-            lista.insertarUltimo(value);
+
+        String name = value.getNombre();
+        String numeral = value.getNumeral();
+
+        int key = hashCode1(name, numeral);
+
+        Lista sublista = new Lista();
+        sublista.insertarUltimo(value);        
+        Lista valorArreglo = array[key];
+
+        while (!valorArreglo.esVacia()) {
+            key = (key + 1) % hashSize;
+            valorArreglo = array[key];
         }
+        valorArreglo.insertarUltimo(value);
     }
     
-   // BUscar un integrante por nombre completo
-    public Integrante buscar(String nombre){
-        int key = hashCode(nombre);
-        Lista lista = array[key];
-        Nodo actual = lista.getInicio();
-        while(actual != null){
-           Integrante integrante = (Integrante) actual.getInfo();
-           if(integrante.getNombreCompleto().equalsIgnoreCase(nombre)){
-               return integrante;
-           }
-           actual = actual.getSiguiente();
-        }
-        return null; // No encontrado
+    public Integrante obtenerIntegrante(int indice){
+        return (Integrante) array[indice].getInicio().getInfo();
     }
+    
+    public void devolverIntegrante(int indice, Integrante integrante){
+        array[indice].setInicio(integrante);
+    }
+
+    // buscar un integrante por nombre completo
+//    public Integrante buscar(String nombre) {
+//        int key = hashCode1(nombre); // por cambiar
+//        Lista lista = array[key];
+//        Nodo actual = lista.getInicio();
+//        while (actual != null) {
+//            Integrante integrante = (Integrante) actual.getInfo();
+//            if (integrante.getNombreCompleto().equalsIgnoreCase(nombre)) {
+//                return integrante;
+//            }
+//            actual = actual.getSiguiente();
+//        }
+//        return null; // No encontrado
+//    }
 }

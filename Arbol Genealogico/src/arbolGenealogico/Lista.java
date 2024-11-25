@@ -4,26 +4,25 @@ package arbolGenealogico;
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
-
 /**
  *
  * @author Adrian
  */
 public class Lista {
+
     private Nodo inicio;
-    
+
     /**
      * Constructor por defecto que crea una lista vac&iacute;a.
      */
-    public Lista () {
-    this.inicio = null;
+    public Lista() {
+        this.inicio = null;
     }
-    
+
 //----------getters y setters--------------
-    
     /**
      * Devuelve el nodo inicial de la lista.
+     *
      * @return El nodo inicial.
      */
     public Nodo getInicio() {
@@ -32,81 +31,83 @@ public class Lista {
 
     /**
      * Establece el nodo inicial de la lista.
+     *
      * @param inicio El nuevo nodo inicial.
      */
-    public void setInicio(String inicio) {
-        
+    public void setInicio(Integrante inicio) {
+
         this.inicio = new Nodo(inicio);
     }
-    
+
     // ----------- Metodos Principales ----------------
-    
     /**
      * Verifica si la lista est&aacute; vac&iacute;a.
-     * @return `true` si la lista est&aacute; vac&iacute;a, `false` en caso contrario.
+     *
+     * @return `true` si la lista est&aacute; vac&iacute;a, `false` en caso
+     * contrario.
      */
-    public boolean esVacia(){
+    public boolean esVacia() {
         return inicio == null;
     }
-    
-    public void insertarUltimo(Object dato){
+
+    public void insertarUltimo(Object dato) {
         Nodo nuevo = new Nodo(dato);
-        if(esVacia()){
+        if (esVacia()) {
             inicio = nuevo;
-        } else{
+        } else {
             Nodo ultimo = buscarUltimo();
             ultimo.setSiguiente(nuevo);
         }
     }
-    
-    public void insertarPrimero(Object dato){
+
+    public void insertarPrimero(Object dato) {
         Nodo nuevo = new Nodo(dato);
-        if(esVacia()){
+        if (esVacia()) {
             inicio = nuevo;
-        }else{
+        } else {
             nuevo.setSiguiente(inicio);
             inicio = nuevo;
         }
     }
-    
-    public void insertarDespuesDe(Object dato, Object referencia){
+
+    public void insertarDespuesDe(Object dato, Object referencia) {
         Nodo actual = inicio;
-        while(actual != null && !actual.getInfo().equals(referencia)){
+        while (actual != null && !actual.getInfo().equals(referencia)) {
             actual = actual.getSiguiente();
         }
-        if(actual!=null){
+        if (actual != null) {
             Nodo nuevo = new Nodo(dato);
             nuevo.setSiguiente(actual.getSiguiente());
             actual.setSiguiente(nuevo);
-        }else{
+        } else {
             System.out.println("El nodo de referencia no fue encontrado.");
-        }    
+        }
     }
-    
-    public Nodo buscarUltimo(){
+
+    public Nodo buscarUltimo() {
         Nodo actual = inicio;
-        if(esVacia()){
+        if (esVacia()) {
             return null;
         }
-        while (actual.getSiguiente() !=null){
+        while (actual.getSiguiente() != null) {
             actual = actual.getSiguiente();
         }
         return actual;
     }
-    
-    public boolean seEncuentra(Object dato){
+
+    public boolean seEncuentra(Object dato) {
         Nodo actual = inicio;
-        while(actual != null){
-            if(actual.getInfo().equals(dato)){
+        while (actual != null) {
+            if (actual.getInfo().equals(dato)) {
                 return true;
             }
             actual = actual.getSiguiente();
         }
         return false;
     }
-    
-    public Nodo eliminarPrimero(){
-        if(esVacia()){
+
+    public Nodo eliminarPrimero() {
+        if (esVacia()) {
             return null;
         }
         Nodo eliminado = inicio;
@@ -114,7 +115,7 @@ public class Lista {
         eliminado.setSiguiente(null);
         return eliminado;
     }
-    
+
     public void eliminar(Object dato) {
         if (esVacia()) {
             System.out.println("La lista está vacía.");
@@ -148,5 +149,18 @@ public class Lista {
             actual = actual.getSiguiente();
         }
         return contador;
-    }     
+    }
+
+    public Object buscarPorIndice(int indice) {
+        Nodo actual = inicio;
+        int contador = 0;
+        while (actual != null) {
+            if (contador == indice) {
+                return actual.getInfo();
+            }
+            actual = actual.getSiguiente();
+            contador++;
+        }
+        return null; // Si el índice está fuera de los límites de la lista
+    }
 }
