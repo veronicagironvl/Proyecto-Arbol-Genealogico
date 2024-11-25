@@ -5,7 +5,10 @@
 package arbolGenealogico;
 
 /**
- *
+ * Una tabla hash que almacena y recupera objetos de tipo Integrante.
+ * 
+ * La función hash calcula un c&oacute;digo hash basado en el nombre y el numeral de un Integrante.
+ * Las colisiones se manejan utilizando sondeo lineal.
  * @author aiannelli
  */
 public class HashTable {
@@ -44,14 +47,23 @@ public class HashTable {
         return hashSize;
     }
 
-    /**
-     * @param hashSize the hashSize to set
-     */
+/**
+ * Crea una nueva tabla hash con el tamano especificado.
+ *
+ * @param hashSize El tamano deseado para la tabla hash.
+ */
     public void setHashSize(int hashSize) {
         this.hashSize = hashSize;
     }
 
     // Calcula el hash segun los caracteres del nombre
+    /**
+ * Calcula el c&oacute;digo hash para un Integrante basado en su nombre y numeral.
+ *
+ * @param name El nombre del Integrante.
+ * @param numeral El numeral del Integrante.
+ * @return El c&oacute;digo hash calculado.
+ */
     public int hashCode1(String name, String numeral) {
         int clave;
         name = name.toLowerCase();
@@ -61,7 +73,15 @@ public class HashTable {
         return clave;
     }
 
-    // Retorna la suma de valores ascii de una palabra
+ /**
+ * Calcula la suma de los valores ASCII de los caracteres en una cadena.
+ *
+ * Esta funci&oacute;n itera sobre cada car&aacute;cter de la cadena, convierte su valor a un n&uacute;mero entero 
+ * correspondiente a su c&oacute;digo ASCII, y acumula estos valores en una suma total.
+ *
+ * @param palabra La cadena de caracteres a procesar.
+ * @return La suma total de los valores ASCII de los caracteres en la cadena.
+ */
     public int getAsciiValue1(String palabra) {
         int suma = 0;
 
@@ -73,6 +93,12 @@ public class HashTable {
         return suma;
     }
 
+    /**
+ * Imprime el contenido de la tabla hash en la consola.
+ *
+ * Recorre cada posici&oacute;n de la tabla hash y, si la lista en esa posici&oacute;n no est&aacute; vac&iacute;a, 
+ * imprime el nombre completo del primer elemento de la lista (asumiendo que todos los elementos son de tipo Integrante).
+ */
     public void printHashTable() {
         for (int i = 0; i < hashSize; i++) {
             if (!array[i].esVacia()) {
@@ -87,6 +113,11 @@ public class HashTable {
     }
 
     // Inserta un integrante en la tabla hash
+    /**
+    * Inserta un Integrante en la tabla hash.
+    *
+    * @param value El Integrante a insertar.
+    */
     public void insertInHashtable(Integrante value) {
 
         String name = value.getNombre();
@@ -104,11 +135,26 @@ public class HashTable {
         }
         valorArreglo.insertarUltimo(value);
     }
-    
+    /**
+ * Obtiene el primer Integrante de la lista en la posici&oacute;n indicada de la tabla hash.
+ *
+ * Esta funci&oacute;n asume que cada posici&oacute;n de la tabla hash contiene una lista enlazada,
+ * y devuelve el primer elemento (el "inicio") de esa lista, siempre y cuando no est&eacute; vac&iacute;a.
+ * 
+ * @param indice El &iacute;ndice de la posici&oacute;n en la tabla hash.
+ * @return El primer Integrante de la lista en la posici&oacute;n indicada, o null si la lista est&aacute; vac&iacute;a.
+ */
     public Integrante obtenerIntegrante(int indice){
         return (Integrante) array[indice].getInicio().getInfo();
     }
-    
+/**
+ * Reemplaza el primer elemento de la lista en la posici&oacute;n indicada de la tabla hash.
+ *
+ * Esta funci&oacute;n asume que cada posici&oacute;n de la tabla hash contiene una lista enlazada.
+ * El nuevo Integrante se convierte en el nuevo inicio de la lista, reemplazando al elemento existente.
+ * @param indice El &iacute;ndice de la posici&oacute;n en la tabla hash.
+ * @param integrante El nuevo Integrante a colocar al inicio de la lista.
+ */    
     public void devolverIntegrante(int indice, Integrante integrante){
         array[indice].setInicio(integrante);
     }

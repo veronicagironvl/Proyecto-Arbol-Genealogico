@@ -31,7 +31,21 @@ public class JSON {
     public JSON(String rutaArchivo) {
         this.archivo = rutaArchivo;
     }
-
+/**
+ * Carga datos de un archivo JSON y construye un &aacute;rbol genealógico.
+ *
+ * Esta funci&oacute;n lee un archivo JSON que contiene informaci&oacute;n sobre un &aacute;rbol geneal&oacute;gico, 
+ * crea una estructura de &aacute;rbol y una tabla hash de los integrantes.
+ * 
+ * Lee el archivo JSON y parsea los datos.
+ * Itera sobre los miembros de cada linaje.
+ * Crea objetos Integrante y los agrega a una lista.
+ * Resuelve las relaciones padre-hijo y construye el &aacute;rbol.
+ * Crea una tabla hash de los integrantes para un acceso m&aacute;s r&aacute;pido.
+ *
+ * @return Una tabla hash de los integrantes cargados.
+ * @throws IllegalArgumentException Si el formato del JSON es inválido.
+ */
     public HashTable cargarDesdeJSON() {
         JSONParser parser = new JSONParser();
         Arbol arbol = new Arbol();
@@ -159,6 +173,15 @@ public class JSON {
 //    }
 //
 //    }
+ /**
+ * Busca un nodo en el &aacute;rbol por su nombre completo.
+ *
+ * Recorre el &aacute;rbol para encontrar el nodo cuyo integrante tenga el nombre completo especificado.
+ *
+ * @param nodo El nodo actual en la b&uacute;squeda.
+ * @param nombre El nombre completo a buscar.
+ * @return El nodo encontrado, o null si no se encuentra.
+ */
     private NodoArbol buscarNodoPorNombre(NodoArbol nodo, String nombre) {
         if (nodo == null) {
             return null;
@@ -179,7 +202,15 @@ public class JSON {
         }
         return null;
     }
-
+/**
+ * Busca un nodo en el &aacute;rbol por su mote.
+ *
+ * Recorre el &aacute;rbol para encontrar el nodo cuyo integrante tenga el mote especificado.
+ *
+ * @param nodo El nodo actual en la b&uacute;squeda.
+ * @param mote El mote a buscar.
+ * @return El nodo encontrado, o null si no se encuentra.
+ */
     private NodoArbol buscarNodoPorMote(NodoArbol nodo, String mote) {
         if (nodo == null) {
             return null;
@@ -198,7 +229,15 @@ public class JSON {
         }
         return null;
     }
-
+/**
+ * Busca un nodo en el &aacute;rbol por su nombre completo y numeral.
+ *
+ * Recorre el &aacute;rbol para encontrar el nodo cuyo integrante tenga el nombre completo y numeral especificados.
+ *
+ * @param nodo El nodo actual en la b&uacute;squeda.
+ * @param nombrePadre El nombre completo y numeral del padre del nodo buscado.
+ * @return El nodo encontrado, o null si no se encuentra.
+ */
     private NodoArbol buscarNodoPorCombinacion(NodoArbol nodo, String nombrePadre, String numeral) {
         if (nodo == null) {
             return null;
@@ -221,10 +260,14 @@ public class JSON {
         return null;
     }
 
-    /**
-     * @throws IllegalArgumentException Valida que el objeto procesado es un
-     * JSONArray.
-     */
+/**
+ * Valida si un objeto es un arreglo JSON.
+ *
+ * @param objeto El objeto a validar.
+ * @param mensaje El mensaje de error a lanzar si la validaci&oacute;n falla.
+ * @return El objeto validado como JSONArray.
+ * @throws IllegalArgumentException Si el objeto no es un JSONArray.
+ */
     private JSONArray validarArr(Object objeto, String mensaje) {
         if (!(objeto instanceof JSONArray)) {
             throw new IllegalArgumentException("Formato incorrecto: " + mensaje);
@@ -232,17 +275,30 @@ public class JSON {
         return (JSONArray) objeto;
     }
 
-    /**
-     * @throws IllegalArgumentException Valida que el objeto procesado es un
-     * JSONArray.
-     */
+/**
+ * Valida si un objeto es un objeto JSON.
+ *
+ * @param objeto El objeto a validar.
+ * @param mensaje El mensaje de error a lanzar si la validaci&oacute;n falla.
+ * @return El objeto validado como JSONObject.
+ * @throws IllegalArgumentException Si el objeto no es un JSONObject.
+ */
     private JSONObject validarObj(Object objeto, String mensaje) {
         if (!(objeto instanceof JSONObject)) {
             throw new IllegalArgumentException("Formato incorrecto: " + mensaje);
         }
         return (JSONObject) objeto;
     }
-
+/**
+ * Procesa los detalles de un integrante a partir de un objeto JSON.
+ *
+ * Extrae informaci&oacute;n como el numeral, padres, mote, t&iacute;tulos, etc., del objeto JSON y la asigna al objeto Integrante.
+ *
+ * @param nombreCompleto El nombre completo del integrante.
+ * @param detalles Los detalles del integrante en formato JSON.
+ * @return El objeto Integrante creado.
+ * @throws IllegalArgumentException Si ocurre un error al procesar los detalles.
+ */
     private Integrante procesarDetalles(String nombreCompleto, JSONArray detalles) {
         Integrante integrante = new Integrante();
         integrante.setNombreCompleto(nombreCompleto);
@@ -293,21 +349,46 @@ public class JSON {
         }
         return integrante;
     }
-
+/**
+ * Valida el campo "Born to" de un integrante.
+ *
+ * Verifica que el valor del campo sea una cadena no vac&iacute;a.
+ *
+ * @param value El valor del campo "Born to".
+ * @return El valor validado.
+ * @throws IllegalArgumentException Si el valor no es una cadena no vac&iacute;a.
+ */
     private String validateBornTo(Object value) {
         if (!(value instanceof String) || ((String) value).isEmpty()) {
             throw new IllegalArgumentException("El campo 'Born to' debe ser una cadena no vacía.");
         }
         return (String) value;
     }
-
+/**
+ * Valida un campo de texto no vac&iacute;o.
+ *
+ * Verifica que el valor del campo sea una cadena no vac&iacute;a.
+ *
+ * @param value El valor del campo.
+ * @param fieldName El nombre del campo.
+ * @return El valor validado.
+ * @throws IllegalArgumentException Si el valor no es una cadena no vac&iacute;a.
+ */
     private String validateNonEmptyString(Object value, String fieldName) {
         if (!(value instanceof String) || ((String) value).isEmpty()) {
             throw new IllegalArgumentException("El campo '" + fieldName + "' debe ser una cadena no vacía.");
         }
         return (String) value;
     }
-
+/**
+ * Valida y procesa la lista de hijos de un integrante.
+ *
+ * Verifica que el valor del campo "Father to" sea un arreglo de cadenas y crea una lista de hijos.
+ *
+ * @param value El valor del campo "Father to".
+ * @return La lista de hijos.
+ * @throws IllegalArgumentException Si el valor no es un arreglo de cadenas no vac&iacute;as.
+ */
     private Lista validateChildren(Object value) {
         if (!(value instanceof JSONArray)) {
             throw new IllegalArgumentException("El campo 'Father to' debe ser un array.");
@@ -324,7 +405,12 @@ public class JSON {
         }
         return hijos;
     }
-
+/**
+ * Establece el hash para cada integrante en la lista y los inserta en una tabla hash.
+ *
+ * @param listaIntegrantes La lista de integrantes.
+ * @return La tabla hash creada.
+ */
     private HashTable establecerHashes(Lista listaIntegrantes) {
         int longitud = listaIntegrantes.longitud();
         HashTable hashtable = new HashTable(longitud);
