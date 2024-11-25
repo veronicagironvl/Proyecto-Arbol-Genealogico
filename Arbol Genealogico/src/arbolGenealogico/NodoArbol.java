@@ -17,7 +17,7 @@ public class NodoArbol {
  * Este constructor inicializa un nuevo nodo del &aacute;rbol, asignándole el integrante proporcionado y creando una lista vacía para almacenar sus hijos.
  *
  * @param integrante El integrante asociado a este nodo.
- */    
+ */   
     public NodoArbol(Integrante integrante){
         this.integrante = integrante;
         this.hijos = new Lista();

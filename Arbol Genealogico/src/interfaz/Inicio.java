@@ -19,6 +19,7 @@ public class Inicio extends javax.swing.JFrame {
     private VentanaBuscarPorNombre ventanaBuscarPorNombre;
     private VentanaMostrarAntepasados ventanaMostrarAntepasados;
     private VentanaBuscarPorTitulo ventanaBuscarPorTitulo;
+    private VentanaDiagramaDeClases ventanaDiagramaDeClases;
 
     public Inicio() {
         initComponents();
@@ -28,6 +29,7 @@ public class Inicio extends javax.swing.JFrame {
         ventanaBuscarPorNombre = new VentanaBuscarPorNombre();
         ventanaMostrarAntepasados = new VentanaMostrarAntepasados();
         ventanaBuscarPorTitulo = new VentanaBuscarPorTitulo();
+        ventanaDiagramaDeClases = new VentanaDiagramaDeClases(); 
 
         // Mostrar inicialmente la ventana de árbol genealógico
         mostrarVentana(ventanaArbolGenealogico);
@@ -80,6 +82,8 @@ public class Inicio extends javax.swing.JFrame {
         botonBuscarPorTitulo = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
+        botonListaGeneracion1 = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         botonListaGeneracion = new javax.swing.JButton();
         contenido = new javax.swing.JPanel();
@@ -198,11 +202,29 @@ public class Inicio extends javax.swing.JFrame {
         jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/interfaz/imagenes/arbol-de-listas.png"))); // NOI18N
         jPanel7.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
+        botonListaGeneracion1.setBackground(new java.awt.Color(247, 244, 233));
+        botonListaGeneracion1.setToolTipText("");
+        botonListaGeneracion1.setBorder(null);
+        botonListaGeneracion1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonListaGeneracion1ActionPerformed(evt);
+            }
+        });
+        jPanel7.add(botonListaGeneracion1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 300, 60));
+
+        jLabel11.setFont(new java.awt.Font("Roboto Medium", 1, 14)); // NOI18N
+        jLabel11.setForeground(new java.awt.Color(75, 46, 25));
+        jLabel11.setText("Lista de una Generación");
+        jLabel11.setToolTipText("");
+        jPanel7.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 20, -1, -1));
+
+        jPanel1.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 410, 300, 60));
+
         jLabel6.setFont(new java.awt.Font("Roboto Medium", 1, 14)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(75, 46, 25));
-        jLabel6.setText("Lista de una Generación");
+        jLabel6.setText("Ver diagrama de clases");
         jLabel6.setToolTipText("");
-        jPanel7.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 20, -1, -1));
+        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 610, -1, -1));
 
         botonListaGeneracion.setBackground(new java.awt.Color(247, 244, 233));
         botonListaGeneracion.setToolTipText("");
@@ -212,9 +234,7 @@ public class Inicio extends javax.swing.JFrame {
                 botonListaGeneracionActionPerformed(evt);
             }
         });
-        jPanel7.add(botonListaGeneracion, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 300, 60));
-
-        jPanel1.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 410, 300, 60));
+        jPanel1.add(botonListaGeneracion, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 590, 300, 60));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 300, 650));
 
@@ -234,7 +254,7 @@ public class Inicio extends javax.swing.JFrame {
     }//GEN-LAST:event_botonArbolGenealogicoActionPerformed
 
     private void botonListaGeneracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonListaGeneracionActionPerformed
-         mostrarVentana(ventanaListaGeneracion);
+        mostrarVentana(ventanaDiagramaDeClases);
     }//GEN-LAST:event_botonListaGeneracionActionPerformed
 
     private void botonMostrarAntepasadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonMostrarAntepasadosActionPerformed
@@ -244,6 +264,10 @@ public class Inicio extends javax.swing.JFrame {
     private void botonBuscarPorTituloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonBuscarPorTituloActionPerformed
         mostrarVentana(ventanaBuscarPorTitulo);
     }//GEN-LAST:event_botonBuscarPorTituloActionPerformed
+
+    private void botonListaGeneracion1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonListaGeneracion1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_botonListaGeneracion1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -286,10 +310,12 @@ public class Inicio extends javax.swing.JFrame {
     private javax.swing.JButton botonBuscarPorNombre;
     private javax.swing.JButton botonBuscarPorTitulo;
     private javax.swing.JButton botonListaGeneracion;
+    private javax.swing.JButton botonListaGeneracion1;
     private javax.swing.JButton botonMostrarAntepasados;
     private javax.swing.JPanel contenido;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
