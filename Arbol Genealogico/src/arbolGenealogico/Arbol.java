@@ -33,6 +33,8 @@ public class Arbol {
                 this.raiz = nodoRaiz;
             }
         }
+        this.agregarHijos(raiz, hashTable);       
+        this.verPadre(raiz);
         
         this.graph = this.generarGrafo();
     }
@@ -133,7 +135,15 @@ public class Arbol {
         }
         return graph;
     }
-
+ 
+    private void verPadre(NodoArbol padre){
+        Nodo actual = new Nodo(padre.getHijos().getInicio());
+        while(actual != null){
+            System.out.println(actual);
+            actual = actual.getSiguiente();
+        }
+    }
+        
     private NodoArbol agregarHijos(NodoArbol padre, HashTable hashTable) {
         for (int i = 0; i < hashTable.getHashSize(); i++) {
             Integrante aux = hashTable.obtenerIntegrante(i);
