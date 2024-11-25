@@ -23,6 +23,8 @@ public class Integrante {
     private Lista hijos; // "Father to" (lista de nombres)
     private String notas; // "Notes"
     private String destino; // "Fate"
+    private String fatherNameKey;
+    private String fatherMoteKey;
 
     public Integrante(){
         this.hijos = new Lista(); //Inicializa la lista de hijos como vacia
@@ -208,9 +210,14 @@ public class Integrante {
     public void setDestino(String destino) {
         this.destino = destino;
     }
-
-
     
+    public String getIdentificadorUnico() {
+        return nombreCompleto + ", " + numeral; // Crea un identificador único
+    }
+    public String fatherNameKey() {
+        return nombreCompleto + ", " + numeral; // Crea un identificador único
+    }
+
 }
 
 

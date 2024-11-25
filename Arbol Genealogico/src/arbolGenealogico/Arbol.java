@@ -37,7 +37,8 @@ public class Arbol {
     
     private NodoArbol buscarNodo(NodoArbol nodo, String nombre){
         if(nodo == null) return null;
-        if (nodo.getIntegrante().getNombreCompleto().equals(nombre)) return nodo;
+        //if (nodo.getIntegrante().getNombreCompleto().equals(nombre)) return nodo;
+        if (nodo.getIntegrante().getIdentificadorUnico().equals(nombre)) return nodo;
         
         Nodo actual = nodo.getHijos().getInicio();
         while(actual != null){

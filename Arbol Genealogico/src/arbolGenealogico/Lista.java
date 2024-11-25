@@ -149,4 +149,23 @@ public class Lista {
         }
         return contador;
     }     
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        Nodo actual = inicio;
+
+        while (actual != null) {
+            Integrante integrante = (Integrante) actual.getInfo();
+            sb.append(integrante.getNombreCompleto())
+              .append(" (Padre: ").append(integrante.getPadre())
+              .append(", Mote: ").append(integrante.getMote())
+              .append(", Numeral: ").append(integrante.getNumeral())
+              .append(")\n");
+            actual = actual.getSiguiente();
+        }
+
+        return sb.toString();
+    }
 }
+
+

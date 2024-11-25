@@ -33,7 +33,7 @@ public class JSON {
         Arbol arbol = new Arbol();
         Set<String> uniqueNamesAndNumbers = new HashSet<>();
         Set<String> uniqueMotes = new HashSet<>();
-        Set<String> nodosDefinidos = new HashSet<>(); // Nombre de nodos ya procesados
+        Set<Integrante> nodosDefinidos = new HashSet<>(); // Nombre de nodos ya procesados
         Lista pendientes = new Lista(); // Nodos con padres no encontrados
         boolean raizDefinida = false; // identificador de si existe una raiz definida
 
@@ -61,28 +61,34 @@ public class JSON {
                         Integrante integrante = crearIntegrante(nombreCompleto, detalles, uniqueNamesAndNumbers, uniqueMotes);
                         
                         String rawPadre = integrante.getPadre();
-                        String padreResuelto = resolverPadre(rawPadre, arbol, integrante.getNumeral());
+                        NodoArbol padreResuelto = resolverPadre(rawPadre, arbol);
                         
-                        // Verifica si el padre resuelto es el propio nodo
-                        if (padreResuelto != null && padreResuelto.equals(nombreCompleto)) {
-                            System.err.println("Error: El nodo " + nombreCompleto + " no puede ser su propio padre.");
-                            continue; // Saltar este nodo para evitar ciclos
-                        }
+//                        // Verifica si el padre resuelto es el propio nodo
+//                        if (padreResuelto != null && padreResuelto.equals(nombreCompleto)) {
+//                            System.err.println("Error: El nodo " + nombreCompleto + " no puede ser su propio padre.");
+//                            continue; // Saltar este nodo para evitar ciclos
+//                        }
 
                         // Verifica si el nodo es la raiz
+
                         if ("[Unknown]".equalsIgnoreCase(rawPadre)) {
                             if (!raizDefinida) {
                                 // Si no hay raiz, este nodo sera la raiz
                                 arbol.insertar(integrante, null);
-                                nodosDefinidos.add(integrante.getNombreCompleto());
+                                nodosDefinidos.add(integrante);
                                 raizDefinida = true;
                             }else{
                                 throw new IllegalArgumentException("Ya existe una raiz definida: " + arbol.getRaiz().getIntegrante().getNombreCompleto());
                             }
-                        } else if (nodosDefinidos.contains(padreResuelto)){
+                            
+                        } else if (padreResuelto != null){
                             // Insertar si el padre ya esta definido
-                            arbol.insertar(integrante, padreResuelto);
-                            nodosDefinidos.add(integrante.getNombreCompleto());
+                            System.out.println(padreResuelto.getIntegrante().getNombreCompleto() + "***************");
+                            //arbol.insertar(integrante, padreResuelto.getIntegrante().getNombreCompleto());
+                            arbol.insertar(integrante, padreResuelto.getIntegrante().getIdentificadorUnico());
+                            //nodosDefinidos.add(integrante.getNombreCompleto());
+                            nodosDefinidos.add(integrante);
+                            System.out.println(integrante.getMote());
                         } else {
                             // Si el padre no está definido, guardar como pendiente
                             System.out.println("Advertencia: Padre no encontrado: " + integrante.getPadre());
@@ -108,116 +114,163 @@ public class JSON {
         return arbol;
     }
 
-    // Método para procesar los nodos pendientes
-    private void procesarPendientes(Lista pendientes, Arbol arbol, Set<String> nodosDefinidos) {
-        boolean huboCambios;
-        do {
-            huboCambios = false;
-            Nodo actual = pendientes.getInicio();
-
-            while (actual != null) {
-                Integrante pendiente = (Integrante) actual.getInfo();
-                String padreResuelto = resolverPadre(pendiente.getPadre(), arbol, pendiente.getNumeral());
-                
-                // Verifica si el padre ya esta definido
-                if (padreResuelto != null && nodosDefinidos.contains(padreResuelto)) {
-                    // Intentar insertar si el padre ya está definido
-                    try {
-                        arbol.insertar(pendiente, padreResuelto);
-                        nodosDefinidos.add(pendiente.getNombreCompleto());
-                        pendientes.eliminar(pendiente); // Eliminar si fue insertado correctamente
-                        huboCambios = true;
-                    } catch (IllegalArgumentException e) {
-                        System.err.println("Error al insertar nodo pendiente: " + pendiente.getNombreCompleto());
-                    }
-                } else if (!nodosDefinidos.contains(padreResuelto)){
-                        System.err.println("El padre de " + pendiente.getNombreCompleto() + " (" + pendiente.getPadre() + ") no existe. Nodo eliminado.");
-                        pendientes.eliminar(pendiente);
-                }
-                actual = actual.getSiguiente();
-            }
-        } while (huboCambios && !pendientes.esVacia());
-
-        // Reportar los nodos restantes
+private void procesarPendientes(Lista pendientes, Arbol arbol, Set<Integrante> nodosDefinidos) {
+    boolean huboCambios;
+    do {
+        huboCambios = false;
+        Nodo actual = pendientes.getInicio();
         if (!pendientes.esVacia()) {
-            System.err.println("No se pudieron insertar algunos nodos debido a padres inexistentes.");
-            Nodo actual = pendientes.getInicio();
-            while (actual != null) {
-                Integrante pendiente = (Integrante) actual.getInfo();
-                System.err.println("Nodo pendiente: " + pendiente.getNombreCompleto() + ", Padre: " + pendiente.getPadre());
-                actual = actual.getSiguiente();
+            System.err.println(pendientes.toString()); // Imprime la lista de pendientes
+        }
+
+        while (actual != null) {
+            Integrante pendiente = (Integrante) actual.getInfo();
+            NodoArbol padreResuelto = resolverPadre(pendiente.getPadre(), arbol);
+
+            // Verifica si el padre ya está definido
+            if (padreResuelto != null) {
+                for (Integrante integrante : nodosDefinidos) {
+                    if (integrante.getNombreCompleto().equals(padreResuelto)) {
+                        // Intentar insertar si el padre ya está definido
+                        try {
+                            arbol.insertar(pendiente, padreResuelto.getIntegrante().getNombreCompleto());
+                            nodosDefinidos.add(pendiente);
+                            pendientes.eliminar(pendiente); // Eliminar si fue insertado correctamente
+                            huboCambios = true;
+                        } catch (IllegalArgumentException e) {
+                            System.err.println("Error al insertar nodo pendiente: " + pendiente.getNombreCompleto());
+                        }
+                        break;
+                    }
+                }
+            } else {
+                System.err.println("El padre de " + pendiente.getNombreCompleto() + " (" + pendiente.getPadre() + ") no existe. Nodo eliminado.");
+                pendientes.eliminar(pendiente);
             }
-        }
-    }
-
-    private String resolverPadre(String rawPadre, Arbol arbol, String numeral){
-        if(rawPadre == null || rawPadre.equalsIgnoreCase("[Unknown]")){
-            return null;
-        }
-        
-        // Buscar padre por combinacion 
-        NodoArbol nodoPadre = buscarNodoPorCombinacion(arbol.getRaiz(), rawPadre, numeral);
-        if(nodoPadre != null){
-            return nodoPadre.getIntegrante().getNombreCompleto();
-        }
-        
-        // Buscar padre por nombre 
-        nodoPadre = buscarNodoPorNombre(arbol.getRaiz(), rawPadre);
-        if(nodoPadre != null){
-            return nodoPadre.getIntegrante().getNombreCompleto();
-        }
-      
-        // Buscar padre por mote
-        nodoPadre = buscarNodoPorMote(arbol.getRaiz(), rawPadre);
-        if(nodoPadre != null){
-            return nodoPadre.getIntegrante().getNombreCompleto();
-        }
-        
-        
-        
-        // Si no se encuentra el padre, devolver el rawPadre como está
-        return rawPadre;
-    }
-
-    private NodoArbol buscarNodoPorNombre(NodoArbol nodo, String nombre){
-        if(nodo == null) return null;
-        
-        if (nodo.getIntegrante().getNombreCompleto().equalsIgnoreCase(nombre)) return nodo;
-        
-        Nodo actual = nodo.getHijos().getInicio();
-        
-        while(actual != null){
-            NodoArbol encontrado = buscarNodoPorNombre((NodoArbol) actual.getInfo(), nombre);
-            if(encontrado != null) return encontrado;
             actual = actual.getSiguiente();
         }
-        return null;
-    }
-    
-    private NodoArbol buscarNodoPorMote(NodoArbol nodo, String mote){
-        if(nodo == null) return null;
-        if(nodo.getIntegrante().getMote() != null && nodo.getIntegrante().getMote().equalsIgnoreCase(mote)) return nodo;
-         
-        Nodo actual = nodo.getHijos().getInicio();
-        while(actual !=null){
-            NodoArbol encontrado = buscarNodoPorMote((NodoArbol) actual.getInfo(), mote);
-            if(encontrado != null) return encontrado;
+    } while (huboCambios && !pendientes.esVacia());
+
+    // Reportar los nodos restantes
+    if (!pendientes.esVacia()) {
+        System.err.println("No se pudieron insertar algunos nodos debido a padres inexistentes.");
+        Nodo actual = pendientes.getInicio();
+        while (actual != null) {
+            Integrante pendiente = (Integrante) actual.getInfo();
+            System.err.println("Nodo pendiente: " + pendiente.getNombreCompleto() + ", Padre: " + pendiente.getPadre());
             actual = actual.getSiguiente();
         }
+    }
+}
+
+private NodoArbol resolverPadre(String rawPadre, Arbol arbol) {
+    if (rawPadre == null || rawPadre.equalsIgnoreCase("[Unknown]")) {
         return null;
     }
-    
-    private NodoArbol buscarNodoPorCombinacion(NodoArbol nodo, String nombrePadre, String numeral){
-        if(nodo == null) return null;
-        String nombreCombinado = nodo.getIntegrante().getNombreCompleto() + ", " + nodo.getIntegrante().getNumeral() + " of his name";
-        
 
-       
-        if(nombreCombinado.equalsIgnoreCase(nombrePadre)) return nodo;
+    // Normalizar el nombre del padre
+    String padreNormalizado = rawPadre.trim().toLowerCase();
+
+    // Luego, intenta buscar por el identificador único
+    NodoArbol nodoPadre = buscarNodoPorCombinacion(arbol.getRaiz(), rawPadre);
+    System.out.println(nodoPadre.getIntegrante().getNombreCompleto());
+    if (nodoPadre != null) {
+        return nodoPadre; // Retorna el identificador único
+    }    
+    
+    // Primero, intenta buscar por mote
+    nodoPadre = buscarNodoPorMote(arbol.getRaiz(), padreNormalizado);
+    if (nodoPadre != null) {
+        return nodoPadre; // Retorna el identificador único
+    }
+
+
+    // Si no se encuentra el padre, imprimir advertencia
+    System.out.println("Advertencia: Padre no encontrado: " + rawPadre);
+    return null;
+}
+
+    
+    private NodoArbol buscarNodoPorIdentificadorUnico(NodoArbol nodo, String nombreCompleto, String numeral) {
+    if (nodo == null) return null;
+
+    String identificadorUnico = nombreCompleto + ", " + numeral; // Crea el identificador único
+    if (nodo.getIntegrante().getIdentificadorUnico().equalsIgnoreCase(identificadorUnico)) return nodo;
+
+    Nodo actual = nodo.getHijos().getInicio();
+
+    while (actual != null) {
+        NodoArbol encontrado = buscarNodoPorIdentificadorUnico((NodoArbol) actual.getInfo(), nombreCompleto, numeral);
+        if (encontrado != null) return encontrado;
+        actual = actual.getSiguiente();
+    }
+    return null;
+}
+    
+    private NodoArbol buscarNodoPorNombre(NodoArbol nodo, String nombreCompleto, String numeral) {
+    if (nodo == null) return null;
+
+    if (nodo.getIntegrante().getNombreCompleto().equalsIgnoreCase(nombreCompleto) && 
+        nodo.getIntegrante().getNumeral().equalsIgnoreCase(numeral)) {
+        return nodo;
+    }
+
+    Nodo actual = nodo.getHijos().getInicio();
+
+    while (actual != null) {
+        NodoArbol encontrado = buscarNodoPorNombre((NodoArbol) actual.getInfo(), nombreCompleto, numeral);
+        if (encontrado != null) return encontrado;
+        actual = actual.getSiguiente();
+    }
+    return null;
+}
+    
+private NodoArbol buscarNodoPorMote(NodoArbol nodo, String mote) {
+    if (nodo == null) return null;
+
+    // Normalizar el mote para la comparación
+    String moteNormalizado = mote.trim().toLowerCase();
+
+    // Comprobar si el mote del nodo coincide
+    if (nodo.getIntegrante().getMote() != null && 
+        nodo.getIntegrante().getMote().trim().toLowerCase().equals(moteNormalizado)) {
+        return nodo;
+    }
+
+    // Recorrer los hijos
+    Nodo actual = nodo.getHijos().getInicio();
+    while (actual != null) {
+        NodoArbol encontrado = buscarNodoPorMote((NodoArbol) actual.getInfo(), mote);
+        if (encontrado != null) return encontrado;
+        actual = actual.getSiguiente();
+    }
+    return null;
+}
+    
+    private NodoArbol buscarNodoPorCombinacion(NodoArbol nodo, String nombrePadre){
+        if(nodo == null) return null;
+        //String nombreCombinado = nodo.getIntegrante().getNombreCompleto() + ", " + nodo.getIntegrante().getNumeral() + " of his name";
+        String nombreCombinado = nodo.getIntegrante().getIdentificadorUnico();
+        Integrante integrante = nodo.getIntegrante();
         
+        System.out.println("leer aquiiiiiiiiiiiiiiii");
+        System.out.println("Nombre completo: "+integrante.getNombreCompleto());
+        System.out.println("Mote: "+integrante.getMote());
+        System.out.println("ID unico: "+(integrante.getNombreCompleto()+", "+integrante.getNumeral()+" of his name"));
+        System.out.println("Nombre padre: "+nombrePadre);
+        String mote = "";
+        if (integrante.getMote() != null){
+            mote = integrante.getMote();
+        }
+        if (integrante.getNombreCompleto().equalsIgnoreCase(nombrePadre) || mote.equalsIgnoreCase(nombrePadre) || (integrante.getNombreCompleto()+", "+integrante.getNumeral()+" of his name").equalsIgnoreCase(nombrePadre)){
+        //if (nombreCombinado.equalsIgnoreCase(nombrePadre + ", ")) return nodo;
+        //if(nombreCombinado.equalsIgnoreCase(nombrePadre)) return nodo;
+        
+        return nodo;
+        } 
         Nodo actual = nodo.getHijos().getInicio();
         while(actual != null){
-            NodoArbol encontrado = buscarNodoPorCombinacion((NodoArbol) actual.getInfo(), nombrePadre, numeral);
+            NodoArbol encontrado = buscarNodoPorCombinacion((NodoArbol) actual.getInfo(), nombrePadre);
             if(encontrado != null) {
                 return encontrado;
             }
@@ -297,9 +350,9 @@ public class JSON {
                     throw new IllegalArgumentException("Campo desconocido: " + key);
             }
         }
-        String uniqueIdentifier = nombreCompleto + ", " + integrante.getNumeral();
-        if(!uniqueNamesAndNumbers.add(uniqueIdentifier)){
-            throw new IllegalArgumentException("El nombre completo y el numero deben ser unicos: " + uniqueIdentifier);
+        String uniqueIdentifier = integrante.getIdentificadorUnico(); // Usa el identificador único
+        if (!uniqueNamesAndNumbers.add(uniqueIdentifier)) {
+        throw new IllegalArgumentException("El nombre completo y el número deben ser únicos: " + uniqueIdentifier);
         }
         return integrante;
     }
