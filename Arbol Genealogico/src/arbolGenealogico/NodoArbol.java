@@ -40,7 +40,7 @@ public class NodoArbol {
         this.hijos = hijos;
     }
     
-    public void agregarHijo(NodoArbol hijo){
+    public void agregarHijo(Integrante hijo){
         getHijos().insertarUltimo(hijo);
     }
 }
