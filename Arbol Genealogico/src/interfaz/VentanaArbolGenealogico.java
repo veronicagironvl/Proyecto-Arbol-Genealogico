@@ -182,16 +182,25 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame  {
 
                 @Override
                 public void buttonPushed(String id) {
-                    System.out.println("Nodo presionado: " + id);
-                    Node clickedNode = graph.getNode(id);
-                    if (clickedNode != null) {
-                        Integrante integrante = (Integrante) clickedNode.getAttribute("integrante");
-                        System.out.println("Integrante: " + (integrante != null ? integrante.getNombreCompleto() : "No encontrado"));
+                    System.out.println("Nodo seleccionado: " + id);
+
+                    // Obtener el nodo del grafo
+                    Node node = graph.getNode(id);
+
+                    if (node != null && node.hasAttribute("integrante")) {
+                        // Obtener el atributo y verificar su tipo
+                        Object attribute = node.getAttribute("integrante");
+                        if (attribute instanceof Integrante integrante) {
+                            // Mostrar los detalles del integrante si es válido
+                            mostrarDetallesIntegrante(integrante);
+                        } else {
+                            // Mensaje de error si el atributo no es del tipo esperado
+                            System.err.println("El atributo 'integrante' no es una instancia válida de Integrante.");
+                        }
                     } else {
-                        System.out.println("Nodo no encontrado.");
+                        System.err.println("El nodo no tiene el atributo 'integrante' o es nulo.");
                     }
                 }
-
                 @Override
                 public void buttonReleased(String id) {
                     System.out.println("Nodo soltado: " + id);
@@ -288,6 +297,29 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame  {
             "   padding: 50px;" +
             "   fill-color: white;" +
             "}";
+    }
+    
+    public void mostrarDetallesIntegrante(Integrante integrante) {
+        StringBuilder detalles = new StringBuilder();
+        detalles.append("Nombre Completo: ").append(integrante.getNombreCompleto()).append("\n");
+        detalles.append("Numeral: ").append(integrante.getNumeral()).append("\n");
+        detalles.append("Padre: ").append(integrante.getPadre()).append("\n");
+        detalles.append("Madre: ").append(integrante.getMadre()).append("\n");
+        detalles.append("Mote: ").append(integrante.getMote()).append("\n");
+        detalles.append("Título: ").append(integrante.getTitulo()).append("\n");
+        detalles.append("Esposa: ").append(integrante.getEsposa()).append("\n");
+        detalles.append("Color de Ojos: ").append(integrante.getColorOjos()).append("\n");
+        detalles.append("Color de Pelo: ").append(integrante.getColorPelo()).append("\n");
+        detalles.append("Hijos: ");
+        Nodo actual = integrante.getHijos().getInicio();
+        while (actual != null) {
+            detalles.append(((Integrante) actual.getInfo()).getNombreCompleto()).append(", ");
+            actual = actual.getSiguiente();
+        }
+        detalles.append("\nNotas: ").append(integrante.getNotas()).append("\n");
+        detalles.append("Destino: ").append(integrante.getDestino()).append("\n");
+
+        JOptionPane.showMessageDialog(null, detalles.toString(), "Detalles del Integrante", JOptionPane.INFORMATION_MESSAGE);
     }
 
     
