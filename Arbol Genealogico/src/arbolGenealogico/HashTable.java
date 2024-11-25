@@ -71,7 +71,7 @@ public class HashTable {
     }
     
     // Inserta un integrante en la tabla hash
-    public void insertInHashtable(Integrante value) {
+    public void insertInHashTable(Integrante value) {
         int key = hashCode(value.getNombreCompleto());
         Lista lista = array[key];
         if(!lista.seEncuentra(value)){

@@ -5,30 +5,43 @@
 package interfaz;
 
 import arbolGenealogico.Arbol;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import arbolGenealogico.Integrante;
 import arbolGenealogico.JSON;
+import arbolGenealogico.NodoArbol;
+import arbolGenealogico.Nodo;
+import arbolGenealogico.Lista;
+
 import org.graphstream.graph.*;
+import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swing_viewer.SwingViewer;
 import org.graphstream.ui.swing_viewer.ViewPanel;
+import org.graphstream.ui.view.ViewerPipe;
+import org.graphstream.ui.view.ViewerListener;
+import org.graphstream.ui.view.Viewer;
+
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-
+import javax.swing.filechooser.FileNameExtensionFilter;
 /**
  *
  * @author veron
  */
-public class VentanaArbolGenealogico extends javax.swing.JFrame {
+public class VentanaArbolGenealogico extends javax.swing.JFrame  {
 
+    private ViewerPipe viewerPipe;
+    private boolean loopActive = true;
     private Graph graph; // Grafo generado
-    private Arbol arbol; // Referencia al arbol cargado
-    
+    private Arbol arbol; // Referencia al árbol cargado
+
     public VentanaArbolGenealogico() {
         initComponents();
         panelGrafo.setLayout(new BorderLayout());
     }
+    
+    
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -42,10 +55,11 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        panelGrafo = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
         cargarArbol = new javax.swing.JButton();
         actualizarGrafo = new javax.swing.JButton();
+        activarListener = new javax.swing.JButton();
+        panelGrafo = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -62,20 +76,13 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
         jLabel5.setToolTipText("");
         jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, -1, -1));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1030, 80));
-
-        jLabel1.setText("aqui ira el grafo");
-        panelGrafo.add(jLabel1);
-
-        jPanel1.add(panelGrafo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 610, 570));
-
         cargarArbol.setText("Añadir Árbol JSON");
         cargarArbol.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cargarArbolActionPerformed(evt);
             }
         });
-        jPanel1.add(cargarArbol, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 120, -1, -1));
+        jPanel2.add(cargarArbol, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 20, -1, -1));
 
         actualizarGrafo.setText("Actualizar Grafo");
         actualizarGrafo.addActionListener(new java.awt.event.ActionListener() {
@@ -83,7 +90,22 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
                 actualizarGrafoActionPerformed(evt);
             }
         });
-        jPanel1.add(actualizarGrafo, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 190, -1, -1));
+        jPanel2.add(actualizarGrafo, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 20, -1, -1));
+
+        activarListener.setText("Activar Listener");
+        activarListener.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                activarListenerActionPerformed(evt);
+            }
+        });
+        jPanel2.add(activarListener, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 20, -1, -1));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1030, 80));
+
+        jLabel1.setText("aqui ira el grafo");
+        panelGrafo.add(jLabel1);
+
+        jPanel1.add(panelGrafo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 1030, 570));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1030, 650));
 
@@ -91,7 +113,7 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cargarArbolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cargarArbolActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
+       JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Selecciona un archivo JSON de árbol genealógico");
 
         // Filtrar para que solo permita archivos JSON
@@ -132,25 +154,145 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_actualizarGrafoActionPerformed
 
-    private void mostrarGrafoEnPanel(){
-        panelGrafo.removeAll(); // Limpia el contenido actual del panel
+    private void activarListenerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_activarListenerActionPerformed
+
+    }//GEN-LAST:event_activarListenerActionPerformed
+  
+ private void mostrarGrafoEnPanel() {
+        panelGrafo.removeAll();
 
         if (graph != null) {
-            // Configurar el visor de GraphStream
-            SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-            viewer.enableAutoLayout();
-            ViewPanel viewerPanel = (ViewPanel) viewer.addDefaultView(false); // Generar el panel de visualización
+            graph.setAttribute("ui.stylesheet", getGraphStyle());
+            graph.setAttribute("ui.quality");
+            graph.setAttribute("ui.antialias");
 
-            panelGrafo.add(viewerPanel, BorderLayout.CENTER); // Agregar al centro del panel
-            panelGrafo.revalidate(); // Validar el nuevo contenido
-            panelGrafo.repaint(); // Redibujar el panel
+            SwingViewer viewer = new SwingViewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+            viewer.enableAutoLayout();
+            ViewPanel viewerPanel = (ViewPanel) viewer.addDefaultView(false);
+
+            agregarNodosAlGrafo();
+
+            // Configura el ViewerPipe
+            viewerPipe = viewer.newViewerPipe();
+            viewerPipe.addViewerListener(new ViewerListener() {
+                @Override
+                public void viewClosed(String viewName) {
+                    System.out.println("Vista cerrada.");
+                }
+
+                @Override
+                public void buttonPushed(String id) {
+                    System.out.println("Nodo presionado: " + id);
+                    Node clickedNode = graph.getNode(id);
+                    if (clickedNode != null) {
+                        Integrante integrante = (Integrante) clickedNode.getAttribute("integrante");
+                        System.out.println("Integrante: " + (integrante != null ? integrante.getNombreCompleto() : "No encontrado"));
+                    } else {
+                        System.out.println("Nodo no encontrado.");
+                    }
+                }
+
+                @Override
+                public void buttonReleased(String id) {
+                    System.out.println("Nodo soltado: " + id);
+                }
+
+                @Override
+                public void mouseLeft(String id) {
+                    System.out.println("Ratón salió del nodo: " + id);
+                }
+
+                @Override
+                public void mouseOver(String id) {
+                    System.out.println("Ratón sobre el nodo: " + id);
+                }
+            });
+
+            iniciarProcesamientoEventos();
+            
+            panelGrafo.add(viewerPanel, BorderLayout.CENTER);
+            panelGrafo.revalidate();
+            panelGrafo.repaint();
         } else {
-            JOptionPane.showMessageDialog(this, "No hay grafo cargado para mostrar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "El grafo está vacío.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
- 
-  
+
+    private void iniciarProcesamientoEventos() {
+        System.out.println("Iniciando procesamiento de eventos...");
+        Thread thread = new Thread(() -> {
+            while (true) {
+                try {
+                    viewerPipe.pump(); // Procesar eventos
+                    System.out.println("Procesando eventos...");
+                    Thread.sleep(100); // Intervalo entre procesamientos
+                } catch (InterruptedException e) {
+                    System.out.println("Error en el procesamiento de eventos: " + e.getMessage());
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void agregarNodosAlGrafo() {
+        if (arbol != null) {
+            Lista nodos = arbol.getTodosLosNodos();
+            Nodo actual = nodos.getInicio();
+
+            while (actual != null) {
+                NodoArbol nodo = (NodoArbol) actual.getInfo();
+                String nombreNodo = nodo.getIntegrante().getNombreCompleto();
+
+                if (graph.getNode(nombreNodo) == null) {
+                    Node graphNode = graph.addNode(nombreNodo);
+                    graphNode.setAttribute("integrante", nodo.getIntegrante());
+                    graphNode.setAttribute("ui.label", nodo.getIntegrante().getNombreCompleto());
+                    graphNode.setAttribute("ui.class", "clickable");
+                    System.out.println("Nodo creado: " + nombreNodo);
+                    System.out.println("Atributos del nodo:");
+                    System.out.println("  ui.label: " + graphNode.getAttribute("ui.label"));
+                    System.out.println("  ui.class: " + graphNode.getAttribute("ui.class"));
+          }
+
+                Nodo hijoActual = nodo.getHijos().getInicio();
+                while (hijoActual != null) {
+                    NodoArbol hijo = (NodoArbol) hijoActual.getInfo();
+                    String hijoNombre = hijo.getIntegrante().getNombreCompleto();
+
+                    if (graph.getEdge(nombreNodo + "->" + hijoNombre) == null) {
+                        graph.addEdge(nombreNodo + "->" + hijoNombre, nombreNodo, hijoNombre, true);
+                    }
+                    hijoActual = hijoActual.getSiguiente();
+                }
+                actual = actual.getSiguiente();
+            }
+        }
+    }
+
+    private String getGraphStyle() {
+        return "node {" +
+            "   fill-color: #6baed6;" +
+            "   size: 30px;" +
+            "   text-size: 14px;" +
+            "   text-color: black;" +
+            "   stroke-mode: plain;" +
+            "   stroke-color: #2171b5;" +
+            "   stroke-width: 2px;" +
+            "}" +
+            "edge {" +
+            "   fill-color: #b2df8a;" +
+            "   size: 2px;" +
+            "}" +
+            "graph {" +
+            "   padding: 50px;" +
+            "   fill-color: white;" +
+            "}";
+    }
+
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton activarListener;
     private javax.swing.JButton actualizarGrafo;
     private javax.swing.JButton cargarArbol;
     private javax.swing.JLabel jLabel1;
@@ -159,4 +301,5 @@ public class VentanaArbolGenealogico extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel panelGrafo;
     // End of variables declaration//GEN-END:variables
+
 }
