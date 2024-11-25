@@ -49,7 +49,13 @@ public class Lista {
     public boolean esVacia() {
         return inicio == null;
     }
-
+/**
+ * Inserta un nuevo elemento al final de la lista.
+ *
+ * Crea un nuevo nodo con el dato proporcionado y lo enlaza al final de la lista.
+ *
+ * @param dato El dato a insertar.
+ */
     public void insertarUltimo(Object dato) {
         Nodo nuevo = new Nodo(dato);
         if (esVacia()) {
@@ -59,7 +65,13 @@ public class Lista {
             ultimo.setSiguiente(nuevo);
         }
     }
-
+/**
+ * Inserta un nuevo elemento al principio de la lista.
+ *
+ * Crea un nuevo nodo con el dato proporcionado y lo enlaza al inicio de la lista.
+ *
+ * @param dato El dato a insertar.
+ */
     public void insertarPrimero(Object dato) {
         Nodo nuevo = new Nodo(dato);
         if (esVacia()) {
@@ -69,7 +81,14 @@ public class Lista {
             inicio = nuevo;
         }
     }
-
+/**
+ * Inserta un nuevo elemento despu&eacute;s de un elemento de referencia.
+ *
+ * Busca el elemento de referencia y si lo encuentra, inserta el nuevo elemento despu&eacute;s de &eacute;l.
+ *
+ * @param dato El dato a insertar.
+ * @param referencia El dato de referencia.
+ */
     public void insertarDespuesDe(Object dato, Object referencia) {
         Nodo actual = inicio;
         while (actual != null && !actual.getInfo().equals(referencia)) {
@@ -83,7 +102,13 @@ public class Lista {
             System.out.println("El nodo de referencia no fue encontrado.");
         }
     }
-
+/**
+ * Busca el &uacute;ltimo elemento de la lista.
+ *
+ * Recorre la lista hasta encontrar el &uacute;ltimo nodo y lo devuelve.
+ *
+ * @return El &uacute;ltimo nodo de la lista, o null si la lista est&aacute; vac&iacute;a.
+ */
     public Nodo buscarUltimo() {
         Nodo actual = inicio;
         if (esVacia()) {
@@ -94,7 +119,14 @@ public class Lista {
         }
         return actual;
     }
-
+/**
+ * Verifica si un elemento se encuentra en la lista.
+ *
+ * Recorre la lista buscando el elemento especificado.
+ *
+ * @param dato El dato a buscar.
+ * @return true si el elemento se encuentra, false en caso contrario.
+ */
     public boolean seEncuentra(Object dato) {
         Nodo actual = inicio;
         while (actual != null) {
@@ -105,7 +137,13 @@ public class Lista {
         }
         return false;
     }
-
+/**
+ * Elimina el primer elemento de la lista.
+ *
+ * Si la lista no est&aacute; vac&iacute;a, elimina el primer nodo y devuelve el dato que conten&iacute;a.
+ *
+ * @return El dato del nodo eliminado, o null si la lista estaba vac&iacute;a.
+ */
     public Nodo eliminarPrimero() {
         if (esVacia()) {
             return null;
@@ -115,7 +153,13 @@ public class Lista {
         eliminado.setSiguiente(null);
         return eliminado;
     }
-
+/**
+ * Elimina un elemento de la lista.
+ *
+ * Busca el elemento en la lista y si lo encuentra, lo elimina.
+ *
+ * @param dato El dato a eliminar.
+ */
     public void eliminar(Object dato) {
         if (esVacia()) {
             System.out.println("La lista está vacía.");
@@ -140,7 +184,13 @@ public class Lista {
             System.out.println("El dato no fue encontrado en la lista.");
         }
     }
-
+/**
+ * Devuelve la longitud de la lista.
+ *
+ * Cuenta el n&uacute;mero de elementos en la lista.
+ *
+ * @return La longitud de la lista.
+ */
     public int longitud() {
         int contador = 0;
         Nodo actual = inicio;
@@ -150,7 +200,14 @@ public class Lista {
         }
         return contador;
     }
-
+/**
+ * Busca un elemento por su &iacute;ndice.
+ *
+ * Recorre la lista hasta encontrar el elemento en la posici&oacute;n indicada por el &iacute;ndice.
+ *
+ * @param indice El &iacute;ndice del elemento a buscar.
+ * @return El dato del elemento en la posici&oacute;n indicada, o null si el &iacute;ndice est&aacute; fuera de rango.
+ */
     public Object buscarPorIndice(int indice) {
         Nodo actual = inicio;
         int contador = 0;
@@ -161,6 +218,6 @@ public class Lista {
             actual = actual.getSiguiente();
             contador++;
         }
-        return null; // Si el índice está fuera de los límites de la lista
+        return null; // Si el &iacute;ndice est&aacute; fuera de los l&iacute;mites de la lista
     }
 }

@@ -26,6 +26,9 @@ public class Integrante {
     private String destino; // "Fate" (opcional)
     private int hash; // Identificador unico
 
+ /**
+ * Crea un nuevo objeto Integrante con todos los atributos inicializados a null o valores por defecto.
+ */
     public Integrante(){
         this.nombreCompleto = null;
         this.nombre = null;
@@ -43,16 +46,20 @@ public class Integrante {
         this.hash = 0;
     }
     
-    /**
-     * @return the nombreCompleto
-     */
+/**
+ * Obtiene el nombre completo del integrante.
+ *
+ * @return El nombre completo.
+ */
     public String getNombreCompleto() {
         return nombreCompleto;
     }
 
-    /**
-     * @param nombreCompleto the nombreCompleto to set
-     */
+/**
+ * Establece el nombre completo del integrante.
+ *
+ * @param nombreCompleto El nuevo nombre completo.
+ */
     public void setNombreCompleto(String nombreCompleto) {
         this.nombreCompleto = nombreCompleto;
         this.setNombre(extraerNombre(nombreCompleto));
@@ -240,10 +247,23 @@ public class Integrante {
         this.nombre = nombre;
     }
     
+/**
+ * Obtiene un identificador único para el integrante, compuesto por su nombre completo y numeral.
+ *
+ * @return El identificador único.
+ */
     public String getIdentificadorUnico(){
         return nombreCompleto+", "+numeral+" of his name";
     }
-    
+
+
+/**
+ * Extrae el primer nombre del nombre completo.
+ * Este m&eacute;todo es privado y se utiliza internamente para establecer el atributo "nombre".
+ *
+ * @param nombreCompleto El nombre completo.
+ * @return El primer nombre.
+ */    
     public String extraerNombre(String nombreCompleto) {
         String[] partes = nombreCompleto.split(" ");
         return partes[0];
