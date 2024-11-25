@@ -33,25 +33,26 @@ public class Arbol {
                 this.raiz = nodoRaiz;
             }
         }
-        this.agregarHijos(raiz, hashTable);       
+        this.agregarHijos(raiz, hashTable);
+        
         this.verPadre(raiz);
         
         this.graph = this.generarGrafo();
     }
 
-    public void insertar(Integrante integrante, String nombrePadre) {
-        NodoArbol nuevoNodo = new NodoArbol(integrante);
-        if (raiz == null) {
-            raiz = nuevoNodo; // Si el a rol esta vacio, este nodo sera la raiz
-        } else {
-            NodoArbol padre = buscarNodo(raiz, nombrePadre);
-            if (padre != null) {
-                padre.agregarHijo(nuevoNodo);
-            } else {
-                throw new IllegalArgumentException("Padre no encontrado:" + nombrePadre);
-            }
-        }
-    }
+//    public void insertar(Integrante integrante, String nombrePadre) {
+//        NodoArbol nuevoNodo = new NodoArbol(integrante);
+//        if (raiz == null) {
+//            raiz = nuevoNodo; // Si el a rol esta vacio, este nodo sera la raiz
+//        } else {
+//            NodoArbol padre = buscarNodo(raiz, nombrePadre);
+//            if (padre != null) {
+//                padre.agregarHijo(nuevoNodo);
+//            } else {
+//                throw new IllegalArgumentException("Padre no encontrado:" + nombrePadre);
+//            }
+//        }
+//    }
 
     private NodoArbol buscarNodo(NodoArbol nodo, String nombre) {
         if (nodo == null) {
@@ -120,7 +121,8 @@ public class Arbol {
         // Agregar hijos y sus conexiones
         Nodo actual = nodo.getHijos().getInicio();
         while (actual != null) {
-            NodoArbol hijo = (NodoArbol) actual.getInfo();
+            NodoArbol hijo = new NodoArbol((Integrante)actual.getInfo());
+            //NodoArbol hijo = (NodoArbol) actual.getInfo();
             agregarNodoGrafico(graph, hijo); // Agrega al nodo hijo
             
             String idHijo = Integer.toString(hijo.getIntegrante().getHash());
@@ -139,7 +141,7 @@ public class Arbol {
     private void verPadre(NodoArbol padre){
         Nodo actual = new Nodo(padre.getHijos().getInicio());
         while(actual != null){
-            System.out.println(actual);
+            System.out.println(actual.getInfo().toString());
             actual = actual.getSiguiente();
         }
     }
@@ -148,9 +150,14 @@ public class Arbol {
         for (int i = 0; i < hashTable.getHashSize(); i++) {
             Integrante aux = hashTable.obtenerIntegrante(i);
             String nombrePadre = aux.getPadre();
+            System.out.println("-------------"+aux.getNombre()+" ,cuyo padre es: "+nombrePadre+"----------");
             if (esHijoDe(nombrePadre, hashTable)) {
-                NodoArbol hijo = new NodoArbol(aux);
-                padre.agregarHijo(hijo);
+//                Integrante hijo = aux;
+                padre.agregarHijo(aux);
+                this.verPadre(padre);
+                //return aux;
+            }else{
+                System.out.println("skippeado");
             }
         }
         return padre;
@@ -161,14 +168,19 @@ public class Arbol {
         for (int i = 0; i < hashTable.getHashSize(); i++) {
             Integrante aux = hashTable.obtenerIntegrante(i);
             if (aux.getIdentificadorUnico().equalsIgnoreCase(nombrePadre)) {
+                System.out.println("coincide id unico. "+aux.getIdentificadorUnico()+"="+nombrePadre);
                 return true;
             } else if (aux.getMote() != null) {
                 if (aux.getMote().equalsIgnoreCase(nombrePadre)) {
+                    System.out.println("coincide mote. "+aux.getMote()+"="+nombrePadre);
                     return true;
                 }
             } else if (aux.getNombreCompleto().equalsIgnoreCase(nombrePadre)) {
+                System.out.println("coincide nombre completo. "+aux.getNombreCompleto()+"="+nombrePadre);
                 return true;
-            }
+            }else{
+                return false;
+            }           
         }
         return false;
     }
